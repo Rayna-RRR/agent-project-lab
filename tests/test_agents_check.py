@@ -4,7 +4,6 @@ from typer.testing import CliRunner
 
 from codex_project_lab.cli import app
 
-
 COMPLETE_AGENTS = """# AGENTS.md
 
 ## Project Purpose

@@ -4,7 +4,7 @@ Codex Project Lab is a local-first CLI tool that helps builders turn rough proje
 
 It does not replace Codex. It helps users use Codex better by structuring project context, rules, tasks, skills, and learning logs.
 
-This repository is currently an early v0.1 implementation. `lab init`, `lab agents check`, and `lab skill new` work; the remaining commands are intentionally stubbed.
+This repository is currently an early v0.1 implementation. `lab init`, `lab agents check`, `lab skill new`, and `lab skill review` work; `lab log add` remains stubbed.
 
 ## Install
 
@@ -30,7 +30,8 @@ lab log add [--log-file logs/codex_runs.md]
 - `lab init` interactive project workflow generation.
 - `lab agents check` practical AGENTS.md quality validation.
 - `lab skill new` reusable Agent Skill draft generation.
-- Command stubs for `skill review` and `log add`.
+- `lab skill review` practical Agent Skill quality validation.
+- Command stub for `log add`.
 - Markdown templates for `PROJECT_BRIEF.md`, `AGENTS.md`, and `TASKS.md`.
 - Project README and `AGENTS.md` rules for Codex.
 - pytest coverage for the CLI scaffold and `lab init`.

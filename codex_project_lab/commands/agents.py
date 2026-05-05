@@ -36,7 +36,10 @@ REQUIREMENTS = (
         name="Project purpose",
         heading_keywords=("project purpose", "purpose", "goal"),
         body_keywords=("project purpose", "helps", "goal", "mission"),
-        suggestion="Add a section explaining what this project is for and what Codex should optimize for.",
+        suggestion=(
+            "Add a section explaining what this project is for and what Codex should "
+            "optimize for."
+        ),
     ),
     Requirement(
         name="Repo layout",
@@ -158,7 +161,11 @@ def render_report(path: Path, results: list[CheckResult], score: int) -> None:
     color = "green" if overall == PASS else "red"
     console.print(
         Panel(
-            f"[bold {color}]{overall}[/bold {color}]\nScore: [bold]{score}/100[/bold]\nFile: {path}",
+            (
+                f"[bold {color}]{overall}[/bold {color}]\n"
+                f"Score: [bold]{score}/100[/bold]\n"
+                f"File: {path}"
+            ),
             title="AGENTS.md Check",
         )
     )

@@ -41,6 +41,7 @@ lab --help
 - `lab init` generates `PROJECT_BRIEF.md`, `AGENTS.md`, and `TASKS.md`.
 - `lab agents check` reports AGENTS.md quality with a clear score and exit code.
 - `lab skill new` generates `.agents/skills/<skill-name>/SKILL.md`.
+- `lab skill review` reports SKILL.md quality with a clear score and exit code.
 - Unimplemented commands remain explicit stubs.
 - Focused pytest tests pass for implemented behavior.
 - The scaffold remains local-first with no database and no external API calls.
