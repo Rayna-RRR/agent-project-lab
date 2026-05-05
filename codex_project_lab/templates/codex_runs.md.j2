@@ -1,3 +1,40 @@
+{% if include_header -%}
 # Codex Run Logs
 
-Placeholder Codex run log template for future implementation.
+Append-only notes from Codex-assisted project runs. Use this file to capture prompts, changes, verification, lessons, and next steps.
+
+{% endif -%}
+## {{ entry.timestamp }} - {{ entry.task_title }}
+
+### Task Goal
+
+{{ entry.task_goal }}
+
+### Codex Prompt Summary
+
+{{ entry.prompt_summary }}
+
+### Changed Files
+
+{{ entry.changed_files }}
+
+### Verification
+
+- Command: `{{ entry.verification_command }}`
+- Result: {{ entry.verification_result }}
+
+### What Worked
+
+{{ entry.what_worked }}
+
+### What Remains
+
+{{ entry.what_remains }}
+
+### Lesson Learned
+
+{{ entry.lesson_learned }}
+
+### Next Step
+
+{{ entry.next_step }}
