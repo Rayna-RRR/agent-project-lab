@@ -1,3 +1,42 @@
-# Skill
+---
+name: {{ skill.slug }}
+description: {{ skill.description }}
+---
 
-Placeholder Agent Skill template for future implementation.
+# {{ skill.name }}
+
+## Description
+
+{{ skill.description }}
+
+## When To Use This Skill
+
+{{ skill.when_to_use }}
+
+## When Not To Use This Skill
+
+{{ skill.when_not_to_use }}
+
+## Required Inputs
+
+{% for item in skill.required_inputs -%}
+- {{ item }}
+{% endfor %}
+
+## Workflow Steps
+
+{% for item in skill.workflow_steps -%}
+{{ loop.index }}. {{ item }}
+{% endfor %}
+
+## Output Format
+
+{{ skill.output_format }}
+
+## Quality Bar
+
+{{ skill.quality_bar }}
+
+## Failure Handling
+
+{{ skill.failure_handling }}
