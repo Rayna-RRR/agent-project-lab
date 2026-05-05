@@ -112,6 +112,19 @@ def test_skill_review_missing_file_errors(tmp_path: Path):
         assert "missing/SKILL.md" in result.output
 
 
+def test_skill_review_non_skill_file_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("sample_skill.md").write_text(STRONG_SKILL, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", "sample_skill.md"])
+
+        assert result.exit_code == 1
+        assert "Expected a SKILL.md file or skill directory" in result.output
+        assert "sample_skill.md" in result.output
+
+
 def test_skill_review_directory_without_skill_md_errors(tmp_path: Path):
     runner = CliRunner()
 

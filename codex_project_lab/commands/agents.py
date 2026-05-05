@@ -216,6 +216,9 @@ def check(
     if not path.exists():
         console.print(f"[red]File not found:[/red] {path}")
         raise typer.Exit(1)
+    if path.is_dir():
+        console.print(f"[red]Expected an AGENTS.md file, got directory:[/red] {path}")
+        raise typer.Exit(1)
 
     markdown = path.read_text(encoding="utf-8")
     headings = extract_headings(markdown)

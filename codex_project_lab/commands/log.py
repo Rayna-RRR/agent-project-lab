@@ -79,8 +79,17 @@ def add(
 ) -> None:
     """Append an agent run log entry to logs/codex_runs.md."""
 
-    entry = collect_entry()
     target = log_file
+    if target.exists() and target.is_dir():
+        console.print(f"[red]Expected a Markdown log file, got directory:[/red] {target}")
+        raise typer.Exit(1)
+    if target.parent.exists() and not target.parent.is_dir():
+        console.print(
+            f"[red]Expected log file parent to be a directory:[/red] {target.parent}"
+        )
+        raise typer.Exit(1)
+
+    entry = collect_entry()
     include_header = not target.exists()
     rendered = render_log_template(include_header=include_header, entry=entry)
 

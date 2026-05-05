@@ -153,7 +153,6 @@ logs/codex_runs.md
 
 - Python CLI using Typer and Rich.
 - Jinja2 Markdown templates.
-- Pydantic dependency reserved for structured validation as the project grows.
 - Local generation of `PROJECT_BRIEF.md`, `AGENTS.md`, `TASKS.md`, `SKILL.md`, and agent run logs.
 - Practical keyword/heading checks for `AGENTS.md` and `SKILL.md`.
 - pytest coverage for the implemented command behavior.

@@ -235,6 +235,9 @@ def resolve_skill_path(path: Path) -> Path:
     if not path.exists():
         console.print(f"[red]File not found:[/red] {path}")
         raise typer.Exit(1)
+    if path.name != "SKILL.md":
+        console.print(f"[red]Expected a SKILL.md file or skill directory:[/red] {path}")
+        raise typer.Exit(1)
 
     return path
 

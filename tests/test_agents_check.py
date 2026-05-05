@@ -102,6 +102,19 @@ def test_agents_check_missing_file_errors(tmp_path: Path):
         assert "missing/AGENTS.md" in result.output
 
 
+def test_agents_check_directory_path_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("docs").mkdir()
+
+        result = runner.invoke(app, ["agents", "check", "docs"])
+
+        assert result.exit_code == 1
+        assert "Expected an AGENTS.md file, got directory" in result.output
+        assert "docs" in result.output
+
+
 def test_agents_check_custom_file_path_works(tmp_path: Path):
     runner = CliRunner()
 

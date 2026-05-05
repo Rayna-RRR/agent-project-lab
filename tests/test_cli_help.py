@@ -3,7 +3,7 @@ from typer.testing import CliRunner
 from codex_project_lab.cli import app
 
 
-def test_lab_help_lists_scaffold_commands():
+def test_lab_help_lists_v01_commands():
     runner = CliRunner()
 
     result = runner.invoke(app, ["--help"])
@@ -13,3 +13,5 @@ def test_lab_help_lists_scaffold_commands():
     assert "agents" in result.output
     assert "skill" in result.output
     assert "log" in result.output
+    assert "AI coding agent" in result.output
+    assert "Agent run log helpers" in result.output

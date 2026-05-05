@@ -75,6 +75,33 @@ def test_log_add_dry_run_does_not_write_file(tmp_path: Path):
         assert not Path("logs/codex_runs.md").exists()
 
 
+def test_log_add_file_option_rejects_directory(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("logs").mkdir()
+
+        result = runner.invoke(app, ["log", "add", "--file", "logs"], input=LOG_INPUT)
+
+        assert result.exit_code == 1
+        assert "Expected a Markdown log file, got directory" in result.output
+        assert "logs" in result.output
+        assert not Path("logs/codex_runs.md").exists()
+
+
+def test_log_add_file_option_rejects_file_parent(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("notes").write_text("not a directory", encoding="utf-8")
+
+        result = runner.invoke(app, ["log", "add", "--file", "notes/runs.md"], input=LOG_INPUT)
+
+        assert result.exit_code == 1
+        assert "Expected log file parent to be a directory" in result.output
+        assert "notes" in result.output
+
+
 def test_log_add_entry_includes_timestamp_and_required_sections(tmp_path: Path):
     runner = CliRunner()
 

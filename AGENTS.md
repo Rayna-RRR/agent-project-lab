@@ -45,7 +45,7 @@ lab --help
 - `lab skill review` reports SKILL.md quality with a clear score and exit code.
 - `lab log add` appends an agent run log entry to Markdown.
 - Focused pytest tests pass for implemented behavior.
-- The scaffold remains local-first with no database and no external API calls.
+- The implementation remains local-first with no database and no external API calls.
 
 ## Do-Not Rules
 
@@ -58,4 +58,4 @@ lab --help
 
 - When adding a CLI command, update `README.md`, `AGENTS.md`, and tests in the same change.
 - When changing a generated Markdown shape, update the corresponding Jinja2 template and tests.
-- When replacing stubs with real behavior, add focused tests in the same change.
+- When changing command behavior, add focused tests in the same change.

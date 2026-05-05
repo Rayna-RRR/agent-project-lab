@@ -1,3 +1,3 @@
-"""Codex Project Lab scaffold package."""
+"""Codex Project Lab package."""
 
 __version__ = "0.1.0"
