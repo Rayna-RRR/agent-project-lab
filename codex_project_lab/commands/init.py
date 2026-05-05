@@ -62,7 +62,7 @@ def init_project(
         typer.Option("--force", "-f", help="Overwrite generated files if they already exist."),
     ] = False,
 ) -> None:
-    """Generate PROJECT_BRIEF.md, AGENTS.md, and TASKS.md for a Codex-ready project."""
+    """Generate PROJECT_BRIEF.md, AGENTS.md, and TASKS.md for an agent-ready project."""
 
     console.print("[bold]Codex Project Lab init[/bold]")
 

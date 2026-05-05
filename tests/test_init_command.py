@@ -7,8 +7,8 @@ from codex_project_lab.cli import app
 INIT_INPUT = "\n".join(
     [
         "Codex Project Lab",
-        "A local-first CLI for shaping Codex-ready project workflows.",
-        "Builders using Codex",
+        "A local-first CLI for shaping agent-ready project workflows.",
+        "Builders using AI coding agents",
         "Rough ideas lack reusable project context",
         "Generate project brief, Generate AGENTS rules, Generate starter tasks",
         "Python, Typer, Rich, Jinja2",

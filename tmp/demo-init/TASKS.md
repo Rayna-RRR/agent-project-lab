@@ -1,6 +1,6 @@
 # AI Resume Reviewer Tasks
 
-Use these starter tasks to turn the project brief into Codex-ready work.
+Use these starter tasks to turn the project brief into agent-ready work.
 
 ## Task 1: CLI that generates review notes and rewrite suggestions
 
@@ -17,4 +17,3 @@ Work on `CLI that generates review notes and rewrite suggestions` using the proj
 ### Acceptance Criteria
 
 - generated report is clear and tests pass
-

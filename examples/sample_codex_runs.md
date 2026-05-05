@@ -1,16 +1,20 @@
-# Codex Run Logs
+# Agent Run Logs
 
-Append-only notes from Codex-assisted project runs. Use this file to capture prompts, changes, verification, lessons, and next steps.
+Append-only notes from AI coding agent runs. Use this file to capture tools used, prompts, changes, verification, lessons, and next steps.
 
 ## 2026-05-05 14:30:00 HKT - Add README checklist output
+
+### Agent/Tool Used
+
+Codex
 
 ### Task Goal
 
 Generate a Markdown checklist that helps users improve README structure.
 
-### Codex Prompt Summary
+### Agent/Tool Prompt Summary
 
-Asked Codex to add a checklist template, wire it into the CLI output, and cover it with pytest.
+Asked an AI coding agent to add a checklist template, wire it into the CLI output, and cover it with pytest.
 
 ### Changed Files
 
@@ -31,7 +35,7 @@ Add a second example for library-style projects.
 
 ### Lesson Learned
 
-Explicit acceptance criteria made the Codex task easier to verify.
+Explicit acceptance criteria made the agent task easier to verify.
 
 ### Next Step
 

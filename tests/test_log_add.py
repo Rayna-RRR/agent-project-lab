@@ -8,8 +8,9 @@ from codex_project_lab.cli import app
 LOG_INPUT = "\n".join(
     [
         "Implement lab log add",
-        "Capture Codex run details in Markdown.",
-        "Asked Codex to implement the log add feature.",
+        "Capture AI coding agent run details in Markdown.",
+        "Qwen Code",
+        "Asked an AI coding agent to implement the log add feature.",
         "codex_project_lab/commands/log.py, tests/test_log_add.py",
         "pytest",
         "19 passed",
@@ -32,9 +33,9 @@ def test_log_add_creates_new_log_file(tmp_path: Path):
         assert result.exit_code == 0
         assert log_file.exists()
         content = log_file.read_text(encoding="utf-8")
-        assert "# Codex Run Logs" in content
+        assert "# Agent Run Logs" in content
         assert "Implement lab log add" in content
-        assert "Appended Codex run log entry" in result.output
+        assert "Appended agent run log entry" in result.output
 
 
 def test_log_add_appends_second_entry(tmp_path: Path):
@@ -47,7 +48,7 @@ def test_log_add_appends_second_entry(tmp_path: Path):
 
         assert first.exit_code == 0
         assert second.exit_code == 0
-        assert content.count("# Codex Run Logs") == 1
+        assert content.count("# Agent Run Logs") == 1
         assert len(re.findall(r"^## \d{4}-\d{2}-\d{2}", content, flags=re.MULTILINE)) == 2
 
 
@@ -83,8 +84,10 @@ def test_log_add_entry_includes_timestamp_and_required_sections(tmp_path: Path):
 
         assert result.exit_code == 0
         assert re.search(r"## \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", content)
+        assert "### Agent/Tool Used" in content
+        assert "Qwen Code" in content
         assert "### Task Goal" in content
-        assert "### Codex Prompt Summary" in content
+        assert "### Agent/Tool Prompt Summary" in content
         assert "### Changed Files" in content
         assert "### Verification" in content
         assert "### What Worked" in content

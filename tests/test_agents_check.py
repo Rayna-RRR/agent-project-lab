@@ -8,7 +8,7 @@ COMPLETE_AGENTS = """# AGENTS.md
 
 ## Project Purpose
 
-Help builders structure Codex-ready project workflows.
+Help builders structure agent-ready project workflows.
 
 ## Repo Layout
 

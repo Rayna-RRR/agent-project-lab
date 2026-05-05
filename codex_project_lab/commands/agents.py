@@ -37,7 +37,7 @@ REQUIREMENTS = (
         heading_keywords=("project purpose", "purpose", "goal"),
         body_keywords=("project purpose", "helps", "goal", "mission"),
         suggestion=(
-            "Add a section explaining what this project is for and what Codex should "
+            "Add a section explaining what this project is for and what an agent should "
             "optimize for."
         ),
     ),
@@ -87,7 +87,7 @@ REQUIREMENTS = (
             "do not rules",
         ),
         body_keywords=("do not", "do-not", "do not build", "do not change", "do-not-build"),
-        suggestion="Add boundaries for what Codex should avoid building or changing.",
+        suggestion="Add boundaries for what an AI coding agent should avoid building or changing.",
     ),
     Requirement(
         name="AGENTS.md update rules",

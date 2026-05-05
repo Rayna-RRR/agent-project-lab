@@ -1,4 +1,4 @@
-"""Codex run log commands."""
+"""Agent run log commands."""
 
 from datetime import datetime
 from pathlib import Path
@@ -24,7 +24,7 @@ def prompt_required(label: str) -> str:
 
 
 def render_log_template(include_header: bool, entry: dict[str, str]) -> str:
-    """Render the packaged Codex run log template."""
+    """Render the packaged agent run log template."""
 
     environment = Environment(
         loader=PackageLoader("codex_project_lab", "templates"),
@@ -41,13 +41,18 @@ def render_log_template(include_header: bool, entry: dict[str, str]) -> str:
 
 
 def collect_entry() -> dict[str, str]:
-    """Collect one Codex run log entry interactively."""
+    """Collect one agent run log entry interactively."""
 
     return {
         "timestamp": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
         "task_title": prompt_required("Task title"),
         "task_goal": prompt_required("Task goal"),
-        "prompt_summary": prompt_required("Codex prompt summary"),
+        "agent_tool_used": typer.prompt(
+            "Agent/tool used (optional)",
+            default="",
+            show_default=False,
+        ).strip(),
+        "prompt_summary": prompt_required("Agent/tool prompt summary"),
         "changed_files": prompt_required("Changed files"),
         "verification_command": prompt_required("Verification command"),
         "verification_result": prompt_required("Verification result"),
@@ -64,7 +69,7 @@ def add(
         typer.Option(
             "--file",
             "-f",
-            help="Markdown file where the Codex run log entry should be appended.",
+            help="Markdown file where the agent run log entry should be appended.",
         ),
     ] = DEFAULT_LOG_FILE,
     dry_run: Annotated[
@@ -72,7 +77,7 @@ def add(
         typer.Option("--dry-run", help="Print the generated log entry without writing a file."),
     ] = False,
 ) -> None:
-    """Append a Codex run log entry to logs/codex_runs.md."""
+    """Append an agent run log entry to logs/codex_runs.md."""
 
     entry = collect_entry()
     target = log_file
@@ -92,7 +97,7 @@ def add(
     else:
         target.write_text(rendered, encoding="utf-8")
 
-    console.print("[green]Appended Codex run log entry:[/green]")
+    console.print("[green]Appended agent run log entry:[/green]")
     console.print(f"- File: {target}")
     console.print(f"- Task: {entry['task_title']}")
     console.print(f"- Timestamp: {entry['timestamp']}")
