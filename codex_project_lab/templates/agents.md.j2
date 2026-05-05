@@ -1,3 +1,61 @@
 # AGENTS.md
 
-Placeholder AGENTS.md template for future implementation.
+## Project Purpose
+
+{{ project.idea }}
+
+## Target Users
+
+{{ project.target_users }}
+
+## Main Problem Solved
+
+{{ project.main_problem }}
+
+## MVP Scope
+
+{% for item in project.mvp_scope -%}
+- {{ item }}
+{% endfor %}
+
+## Tech Stack
+
+{% for item in project.tech_stack -%}
+- {{ item }}
+{% endfor %}
+
+## Setup Command
+
+```bash
+{{ project.setup_command }}
+```
+
+## Test Command
+
+```bash
+{{ project.test_command }}
+```
+
+## Lint Command
+
+```bash
+{{ project.lint_command }}
+```
+
+## Run Command
+
+```bash
+{{ project.run_command }}
+```
+
+## Do-Not-Build Items
+
+{% for item in project.do_not_build -%}
+- {{ item }}
+{% endfor %}
+
+## Done Criteria
+
+{% for item in project.done_criteria -%}
+- {{ item }}
+{% endfor %}

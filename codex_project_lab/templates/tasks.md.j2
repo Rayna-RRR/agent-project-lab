@@ -1,3 +1,24 @@
-# Tasks
+# {{ project.name }} Tasks
 
-Placeholder task prompt pack template for future implementation.
+Use these starter tasks to turn the project brief into Codex-ready work.
+
+{% for item in project.mvp_scope %}
+## Task {{ loop.index }}: {{ item }}
+
+### Context
+
+Project: {{ project.name }}
+
+Idea: {{ project.idea }}
+
+### Prompt
+
+Work on `{{ item }}` using the project context in `PROJECT_BRIEF.md` and rules in `AGENTS.md`.
+
+### Acceptance Criteria
+
+{% for criterion in project.done_criteria -%}
+- {{ criterion }}
+{% endfor %}
+
+{% endfor %}

@@ -1,3 +1,44 @@
-# Project Brief
+# {{ project.name }} Project Brief
 
-Placeholder project brief template for future implementation.
+## Project Idea
+
+{{ project.idea }}
+
+## Target Users
+
+{{ project.target_users }}
+
+## Main Problem Solved
+
+{{ project.main_problem }}
+
+## MVP Scope
+
+{% for item in project.mvp_scope -%}
+- {{ item }}
+{% endfor %}
+
+## Tech Stack
+
+{% for item in project.tech_stack -%}
+- {{ item }}
+{% endfor %}
+
+## Commands
+
+- Setup: `{{ project.setup_command }}`
+- Test: `{{ project.test_command }}`
+- Lint: `{{ project.lint_command }}`
+- Run: `{{ project.run_command }}`
+
+## Do-Not-Build Items
+
+{% for item in project.do_not_build -%}
+- {{ item }}
+{% endfor %}
+
+## Done Criteria
+
+{% for item in project.done_criteria -%}
+- {{ item }}
+{% endfor %}

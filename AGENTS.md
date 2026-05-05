@@ -6,10 +6,10 @@ Codex Project Lab helps builders use Codex better by organizing project context,
 
 ## Repo Layout
 
-- `src/codex_project_lab/`: Python package for the CLI, models, rendering, validation, and command handlers.
-- `src/codex_project_lab/commands/`: Typer command modules grouped by CLI area.
-- `src/codex_project_lab/templates/`: Jinja2 Markdown templates used for generated files.
-- `tests/`: pytest coverage for CLI behavior, validation, rendering, and models.
+- `codex_project_lab/`: Python package for the CLI, templates, and command handlers.
+- `codex_project_lab/commands/`: Typer command modules grouped by CLI area.
+- `codex_project_lab/templates/`: Jinja2 Markdown templates used for generated files.
+- `tests/`: pytest coverage for CLI behavior and implemented command behavior.
 
 ## Setup Command
 
@@ -32,8 +32,9 @@ ruff check .
 ## Done Criteria
 
 - `lab --help` works and lists the planned command surface.
-- Command stubs exist but do not implement full workflow logic yet.
-- At least one pytest smoke test passes.
+- `lab init` generates `PROJECT_BRIEF.md`, `AGENTS.md`, and `TASKS.md`.
+- Unimplemented commands remain explicit stubs.
+- Focused pytest tests pass for implemented behavior.
 - The scaffold remains local-first with no database and no external API calls.
 
 ## Do-Not Rules
