@@ -29,10 +29,17 @@ pytest
 ruff check .
 ```
 
+## Run Command
+
+```bash
+lab --help
+```
+
 ## Done Criteria
 
 - `lab --help` works and lists the planned command surface.
 - `lab init` generates `PROJECT_BRIEF.md`, `AGENTS.md`, and `TASKS.md`.
+- `lab agents check` reports AGENTS.md quality with a clear score and exit code.
 - Unimplemented commands remain explicit stubs.
 - Focused pytest tests pass for implemented behavior.
 - The scaffold remains local-first with no database and no external API calls.
