@@ -9,6 +9,7 @@ Codex Project Lab helps builders use Codex better by organizing project context,
 - `codex_project_lab/`: Python package for the CLI, templates, and command handlers.
 - `codex_project_lab/commands/`: Typer command modules grouped by CLI area.
 - `codex_project_lab/templates/`: Jinja2 Markdown templates used for generated files.
+- `examples/`: Short sample inputs and generated Markdown outputs for README/demo use.
 - `tests/`: pytest coverage for CLI behavior and implemented command behavior.
 
 ## Setup Command
