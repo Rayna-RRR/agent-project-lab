@@ -1,15 +1,24 @@
 """Agent skill commands."""
 
+import json as json_module
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+from codex_project_lab.models import (
+    InputFileError,
+    ReportCheck,
+    SkillNewInput,
+    SkillReviewReport,
+    load_json_model,
+)
 
 console = Console()
 
@@ -222,22 +231,49 @@ def name_is_kebab_case(name: str) -> bool:
     return bool(re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name))
 
 
-def resolve_skill_path(path: Path) -> Path:
+def print_json_payload(payload: object) -> None:
+    """Print machine-readable JSON without Rich formatting."""
+
+    typer.echo(json_module.dumps(payload, indent=2))
+
+
+def print_json_model(model: SkillReviewReport) -> None:
+    """Print a Pydantic model as machine-readable JSON."""
+
+    typer.echo(model.model_dump_json(indent=2))
+
+
+def path_error(path: Path, message: str, json_output: bool) -> None:
+    """Emit a path error in Rich or JSON format and exit."""
+
+    if json_output:
+        print_json_payload(
+            {
+                "path": str(path),
+                "status": "ERROR",
+                "score": 0,
+                "passed": False,
+                "error": message,
+            }
+        )
+    else:
+        console.print(f"[red]{message}:[/red] {path}")
+    raise typer.Exit(1)
+
+
+def resolve_skill_path(path: Path, json_output: bool = False) -> Path:
     """Resolve a direct SKILL.md path or a skill directory containing SKILL.md."""
 
     if path.is_dir():
         skill_file = path / "SKILL.md"
         if not skill_file.exists():
-            console.print(f"[red]Directory does not contain SKILL.md:[/red] {path}")
-            raise typer.Exit(1)
+            path_error(path, "Directory does not contain SKILL.md", json_output)
         return skill_file
 
     if not path.exists():
-        console.print(f"[red]File not found:[/red] {path}")
-        raise typer.Exit(1)
+        path_error(path, "File not found", json_output)
     if path.name != "SKILL.md":
-        console.print(f"[red]Expected a SKILL.md file or skill directory:[/red] {path}")
-        raise typer.Exit(1)
+        path_error(path, "Expected a SKILL.md file or skill directory", json_output)
 
     return path
 
@@ -376,35 +412,92 @@ def render_review_report(path: Path, results: list[ReviewResult], score: int, st
         console.print("- none")
 
 
+def build_review_report(
+    path: Path,
+    results: list[ReviewResult],
+    score: int,
+    status: str,
+) -> SkillReviewReport:
+    """Build a machine-readable skill review report."""
+
+    strengths = [result.requirement.name for result in results if result.passed]
+    missing = [result.requirement.name for result in results if not result.passed]
+    suggestions = [
+        f"{result.requirement.name}: {result.requirement.suggestion}"
+        for result in results
+        if not result.passed
+    ]
+    checks = [
+        ReportCheck(
+            name=result.requirement.name,
+            status=PASS if result.passed else FAIL,
+            evidence=result.evidence,
+            suggestion="" if result.passed else result.requirement.suggestion,
+        )
+        for result in results
+    ]
+
+    return SkillReviewReport(
+        path=str(path),
+        status=status,
+        score=score,
+        passed=score >= 80,
+        strengths=strengths,
+        missing_items=missing,
+        suggestions=suggestions,
+        checks=checks,
+    )
+
+
 def new(
     force: Annotated[
         bool,
         typer.Option("--force", "-f", help="Overwrite an existing SKILL.md file."),
     ] = False,
+    from_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--from-file",
+            help="Read skill fields from a local JSON file instead of prompting.",
+        ),
+    ] = None,
 ) -> None:
     """Create a reusable Agent Skill draft."""
 
-    console.print("[bold]Codex Project Lab skill new[/bold]")
+    console.print("[bold]Agent Project Lab skill new[/bold]")
 
-    raw_name = prompt_required("Skill name")
+    if from_file:
+        try:
+            skill_input = load_json_model(from_file, SkillNewInput)
+        except InputFileError as exc:
+            console.print(f"[red]{exc}[/red]")
+            raise typer.Exit(1) from exc
+        raw_name = skill_input.skill_name
+    else:
+        skill_input = None
+        raw_name = prompt_required("Skill name")
+
     try:
         slug = normalize_skill_name(raw_name)
     except ValueError as exc:
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(1) from exc
 
-    skill = {
-        "name": raw_name.strip(),
-        "slug": slug,
-        "description": prompt_required("One-sentence description"),
-        "when_to_use": prompt_required("When to use this skill"),
-        "when_not_to_use": prompt_required("When not to use this skill"),
-        "required_inputs": prompt_items("Required inputs"),
-        "workflow_steps": prompt_items("Workflow steps"),
-        "output_format": prompt_required("Output format"),
-        "quality_bar": prompt_required("Quality bar"),
-        "failure_handling": prompt_required("Failure handling"),
-    }
+    if skill_input:
+        skill = skill_input.to_template_skill(slug)
+    else:
+        skill = {
+            "name": raw_name.strip(),
+            "slug": slug,
+            "description": prompt_required("One-sentence description"),
+            "when_to_use": prompt_required("When to use this skill"),
+            "when_not_to_use": prompt_required("When not to use this skill"),
+            "required_inputs": prompt_items("Required inputs"),
+            "workflow_steps": prompt_items("Workflow steps"),
+            "output_format": prompt_required("Output format"),
+            "quality_bar": prompt_required("Quality bar"),
+            "failure_handling": prompt_required("Failure handling"),
+        }
 
     skill_path = Path(".agents") / "skills" / slug / "SKILL.md"
     if skill_path.exists() and not force:
@@ -426,13 +519,20 @@ def review(
         Path,
         typer.Argument(help="Path to a SKILL.md file or a skill directory containing SKILL.md."),
     ],
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Print a machine-readable JSON report."),
+    ] = False,
 ) -> None:
     """Review a SKILL.md file and report Agent Skill design quality."""
 
-    resolved_path = resolve_skill_path(skill_path)
+    resolved_path = resolve_skill_path(skill_path, json_output=json_output)
     markdown = resolved_path.read_text(encoding="utf-8")
     results, score, status = review_skill_markdown(markdown)
-    render_review_report(resolved_path, results, score, status)
+    if json_output:
+        print_json_model(build_review_report(resolved_path, results, score, status))
+    else:
+        render_review_report(resolved_path, results, score, status)
 
     if score < 80:
         raise typer.Exit(1)

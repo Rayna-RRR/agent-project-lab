@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codex-project-lab"
-version = "0.1.0"
-description = "Local-first CLI for turning rough project ideas into reusable AI-coding workflows."
+version = "0.2.0"
+description = "Local-first CLI for turning rough project ideas into reusable AI coding agent workflows."
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-  { name = "Codex Project Lab" }
+  { name = "Agent Project Lab" }
 ]
 license = { text = "MIT" }
-keywords = ["codex", "cli", "agents", "skills", "workflow"]
+keywords = ["cli", "agents", "skills", "workflow", "ai-coding"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

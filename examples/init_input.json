@@ -1,0 +1,31 @@
+{
+  "project_name": "Readme Steward",
+  "project_idea": "A local CLI that helps maintain clear README files for small software projects.",
+  "target_users": "Solo developers and small teams using AI coding agents",
+  "main_problem": "README updates are often skipped because project context and verification steps are scattered.",
+  "mvp_scope": [
+    "Generate a README improvement brief",
+    "Create agent-ready repository rules",
+    "Draft reusable README cleanup tasks"
+  ],
+  "tech_stack": [
+    "Python",
+    "Typer",
+    "Rich",
+    "Jinja2"
+  ],
+  "setup_command": "pip install -e \".[dev]\"",
+  "test_command": "pytest",
+  "lint_command": "ruff check .",
+  "run_command": "lab --help",
+  "do_not_build": [
+    "Web UI",
+    "Database",
+    "External API calls"
+  ],
+  "done_criteria": [
+    "Generated Markdown is readable",
+    "Commands are documented",
+    "Tests pass locally"
+  ]
+}

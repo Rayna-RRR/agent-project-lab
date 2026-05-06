@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -150,3 +151,95 @@ def test_skill_review_invalid_name_format_is_detected(tmp_path: Path):
         assert result.exit_code == 0
         assert "Name format" in result.output
         assert "Use lowercase kebab-case" in result.output
+
+
+def test_skill_review_json_strong_skill_passes(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("SKILL.md").write_text(STRONG_SKILL, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", "SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 0
+        assert payload["status"] == "PASS"
+        assert payload["score"] == 100
+        assert payload["passed"] is True
+        assert "YAML frontmatter" in payload["strengths"]
+        assert payload["missing_items"] == []
+
+
+def test_skill_review_json_weak_skill_fails(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("SKILL.md").write_text(WEAK_SKILL, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", "SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "FAIL"
+        assert payload["score"] < 60
+        assert "YAML frontmatter" in payload["missing_items"]
+        assert payload["suggestions"]
+
+
+def test_skill_review_json_directory_path_works(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        skill_dir = Path(".agents/skills/review-skill-draft")
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(STRONG_SKILL, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", str(skill_dir), "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 0
+        assert payload["path"] == ".agents/skills/review-skill-draft/SKILL.md"
+        assert payload["status"] == "PASS"
+
+
+def test_skill_review_json_missing_file_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(app, ["skill", "review", "missing/SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "ERROR"
+        assert payload["passed"] is False
+        assert payload["error"] == "File not found"
+
+
+def test_skill_review_json_directory_without_skill_md_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        skill_dir = Path(".agents/skills/empty-skill")
+        skill_dir.mkdir(parents=True)
+
+        result = runner.invoke(app, ["skill", "review", str(skill_dir), "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "ERROR"
+        assert payload["error"] == "Directory does not contain SKILL.md"
+
+
+def test_skill_review_json_invalid_name_format_is_detected(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("SKILL.md").write_text(INVALID_NAME_SKILL, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", "SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 0
+        assert payload["status"] == "PASS"
+        assert "Name format" in payload["missing_items"]
+        assert any("Use lowercase kebab-case" in item for item in payload["suggestions"])

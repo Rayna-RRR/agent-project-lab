@@ -1,0 +1,22 @@
+{
+  "path": "AGENTS.md",
+  "status": "PASS",
+  "score": 100,
+  "passed": true,
+  "checks": [
+    {
+      "name": "Project purpose",
+      "status": "PASS",
+      "evidence": "Found heading: project purpose",
+      "suggestion": ""
+    },
+    {
+      "name": "Setup command",
+      "status": "PASS",
+      "evidence": "Found heading: setup command",
+      "suggestion": ""
+    }
+  ],
+  "missing_items": [],
+  "suggestions": []
+}

@@ -2,7 +2,7 @@
 
 ## Project Purpose
 
-Codex Project Lab helps builders organize project context, project rules, reusable task prompts, Agent Skills, and agent run logs for AI-assisted development. It started from Codex workflow learning, but the generated Markdown assets are platform-agnostic and must not execute or impersonate any AI coding tool.
+Agent Project Lab helps builders organize project context, project rules, reusable task prompts, Agent Skills, and agent run logs for AI-assisted development. The Python package is still named `codex-project-lab`, but the generated Markdown and JSON assets are platform-agnostic and must not execute or impersonate any AI coding tool.
 
 ## Repo Layout
 
@@ -44,15 +44,18 @@ lab --help
 - `lab skill new` generates `.agents/skills/<skill-name>/SKILL.md`.
 - `lab skill review` reports SKILL.md quality with a clear score and exit code.
 - `lab log add` appends an agent run log entry to Markdown.
+- `lab init`, `lab skill new`, and `lab log add` support local JSON `--from-file` input without breaking interactive prompts.
+- `lab agents check` and `lab skill review` support `--json` output without changing default Rich reports.
 - Focused pytest tests pass for implemented behavior.
 - The implementation remains local-first with no database and no external API calls.
 
 ## Do-Not Rules
 
-- Do not add a web UI, TUI, database, hosted service, or external AI/API integration in v0.1.
+- Do not add a web UI, TUI, database, hosted service, or external AI/API integration in v0.2.
 - Do not make this tool execute or replace Codex, Qwen Code, Claude Code, Cursor, Gemini CLI, Copilot agent, or any other AI coding tool.
 - Do not add hidden network calls.
 - Do not generate files outside the user-selected target directory for generation commands.
+- Do not add YAML support unless it is explicitly scoped for a future release.
 
 ## Update Rules
 

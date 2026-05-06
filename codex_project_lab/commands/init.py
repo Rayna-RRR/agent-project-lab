@@ -1,11 +1,13 @@
 """Project initialization command."""
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.console import Console
+
+from codex_project_lab.models import InputFileError, ProjectInitInput, load_json_model
 
 console = Console()
 
@@ -42,6 +44,35 @@ def prompt_items(label: str) -> list[str]:
     return items
 
 
+def collect_project() -> dict[str, object]:
+    """Collect project fields using the existing interactive prompts."""
+
+    return {
+        "name": prompt_text("Project name"),
+        "idea": prompt_text("One-sentence project idea"),
+        "target_users": prompt_text("Target users"),
+        "main_problem": prompt_text("Main problem solved"),
+        "mvp_scope": prompt_items("MVP scope"),
+        "tech_stack": prompt_items("Tech stack"),
+        "setup_command": prompt_text("Setup command"),
+        "test_command": prompt_text("Test command"),
+        "lint_command": prompt_text("Lint command"),
+        "run_command": prompt_text("Run command"),
+        "do_not_build": prompt_items("Do-not-build items"),
+        "done_criteria": prompt_items("Done criteria"),
+    }
+
+
+def load_project_from_file(path: Path) -> dict[str, object]:
+    """Load non-interactive project input from a local JSON file."""
+
+    try:
+        return load_json_model(path, ProjectInitInput).to_template_project()
+    except InputFileError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+
 def render_template(template_name: str, context: dict[str, object]) -> str:
     """Render one packaged Markdown template."""
 
@@ -61,25 +92,19 @@ def init_project(
         bool,
         typer.Option("--force", "-f", help="Overwrite generated files if they already exist."),
     ] = False,
+    from_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--from-file",
+            help="Read project fields from a local JSON file instead of prompting.",
+        ),
+    ] = None,
 ) -> None:
     """Generate PROJECT_BRIEF.md, AGENTS.md, and TASKS.md for an agent-ready project."""
 
-    console.print("[bold]Codex Project Lab init[/bold]")
+    console.print("[bold]Agent Project Lab init[/bold]")
 
-    project = {
-        "name": prompt_text("Project name"),
-        "idea": prompt_text("One-sentence project idea"),
-        "target_users": prompt_text("Target users"),
-        "main_problem": prompt_text("Main problem solved"),
-        "mvp_scope": prompt_items("MVP scope"),
-        "tech_stack": prompt_items("Tech stack"),
-        "setup_command": prompt_text("Setup command"),
-        "test_command": prompt_text("Test command"),
-        "lint_command": prompt_text("Lint command"),
-        "run_command": prompt_text("Run command"),
-        "do_not_build": prompt_items("Do-not-build items"),
-        "done_criteria": prompt_items("Done criteria"),
-    }
+    project = load_project_from_file(from_file) if from_file else collect_project()
 
     target_dir = Path.cwd()
     output_paths = {filename: target_dir / filename for filename in GENERATED_FILES}

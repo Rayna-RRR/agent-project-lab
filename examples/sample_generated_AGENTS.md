@@ -25,6 +25,12 @@ Project docs often lack setup commands, usage examples, and clear scope, which s
 - Rich
 - pytest
 
+## Repo Layout
+
+- `readme_coach/`: CLI package and command handlers.
+- `readme_coach/templates/`: Markdown templates.
+- `tests/`: pytest coverage for CLI behavior.
+
 ## Setup Command
 
 ```bash

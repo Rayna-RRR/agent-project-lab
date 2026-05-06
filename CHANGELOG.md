@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0
+
+- Added local JSON `--from-file` input for `lab init`, `lab skill new`, and `lab log add`.
+- Added machine-readable `--json` reports for `lab agents check` and `lab skill review`.
+- Added scripted workflow examples for repeatable local agent workflow setup.
+- Updated README language around platform-agnostic AI coding agent workflows.
+
+This release remains local-first and intentionally does not include a web UI, database, external API calls, direct coding-tool integrations, YAML input, or automatic agent execution.
+
 ## v0.1.0
 
 - Added `lab init` to generate `PROJECT_BRIEF.md`, `AGENTS.md`, and `TASKS.md`.

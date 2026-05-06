@@ -2,11 +2,13 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.console import Console
+
+from codex_project_lab.models import InputFileError, RunLogInput, load_json_model
 
 console = Console()
 
@@ -21,6 +23,12 @@ def prompt_required(label: str) -> str:
         console.print(f"[red]{label} is required.[/red]")
         raise typer.Exit(1)
     return value
+
+
+def current_timestamp() -> str:
+    """Return the timestamp format used in agent run log entries."""
+
+    return datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
 def render_log_template(include_header: bool, entry: dict[str, str]) -> str:
@@ -44,7 +52,7 @@ def collect_entry() -> dict[str, str]:
     """Collect one agent run log entry interactively."""
 
     return {
-        "timestamp": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "timestamp": current_timestamp(),
         "task_title": prompt_required("Task title"),
         "task_goal": prompt_required("Task goal"),
         "agent_tool_used": typer.prompt(
@@ -63,6 +71,16 @@ def collect_entry() -> dict[str, str]:
     }
 
 
+def load_entry_from_file(path: Path) -> dict[str, str]:
+    """Load one non-interactive agent run log entry from a local JSON file."""
+
+    try:
+        return load_json_model(path, RunLogInput).to_entry(current_timestamp())
+    except InputFileError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+
 def add(
     log_file: Annotated[
         Path,
@@ -76,6 +94,13 @@ def add(
         bool,
         typer.Option("--dry-run", help="Print the generated log entry without writing a file."),
     ] = False,
+    from_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--from-file",
+            help="Read log fields from a local JSON file instead of prompting.",
+        ),
+    ] = None,
 ) -> None:
     """Append an agent run log entry to logs/agent_runs.md."""
 
@@ -89,7 +114,7 @@ def add(
         )
         raise typer.Exit(1)
 
-    entry = collect_entry()
+    entry = load_entry_from_file(from_file) if from_file else collect_entry()
     include_header = not target.exists()
     rendered = render_log_template(include_header=include_header, entry=entry)
 

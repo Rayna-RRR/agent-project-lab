@@ -1,5 +1,6 @@
 """AGENTS.md validation command."""
 
+import json as json_module
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
@@ -8,6 +9,8 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+from codex_project_lab.models import AgentCheckReport, ReportCheck
 
 console = Console()
 
@@ -205,20 +208,80 @@ def render_report(path: Path, results: list[CheckResult], score: int) -> None:
                 console.print(f"- {result.requirement.name}: {result.requirement.suggestion}")
 
 
+def build_json_report(path: Path, results: list[CheckResult], score: int) -> AgentCheckReport:
+    """Build a machine-readable AGENTS.md check report."""
+
+    status = PASS if score >= 80 else FAIL
+    checks = [
+        ReportCheck(
+            name=result.requirement.name,
+            status=result.status,
+            evidence=result.evidence,
+            suggestion="" if result.status == PASS else result.requirement.suggestion,
+        )
+        for result in results
+    ]
+    missing_items = [result.requirement.name for result in results if result.status == FAIL]
+    suggestions = [
+        f"{result.requirement.name}: {result.requirement.suggestion}"
+        for result in results
+        if result.status != PASS
+    ]
+
+    return AgentCheckReport(
+        path=str(path),
+        status=status,
+        score=score,
+        passed=score >= 80,
+        checks=checks,
+        missing_items=missing_items,
+        suggestions=suggestions,
+    )
+
+
+def print_json_report(report: AgentCheckReport) -> None:
+    """Print machine-readable JSON without Rich formatting."""
+
+    typer.echo(report.model_dump_json(indent=2))
+
+
+def path_error(path: Path, message: str, json_output: bool) -> None:
+    """Emit a path error in Rich or JSON format and exit."""
+
+    if json_output:
+        typer.echo(
+            json_module.dumps(
+                {
+                    "path": str(path),
+                    "status": "ERROR",
+                    "score": 0,
+                    "passed": False,
+                    "error": message,
+                },
+                indent=2,
+            )
+        )
+    else:
+        console.print(f"[red]{message}:[/red] {path}")
+    raise typer.Exit(1)
+
+
 def check(
     path: Annotated[
         Path,
         typer.Argument(help="Path to the AGENTS.md file to validate."),
     ] = Path("AGENTS.md"),
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Print a machine-readable JSON report."),
+    ] = False,
 ) -> None:
     """Validate whether an AGENTS.md file is useful for an AI coding agent."""
 
     if not path.exists():
-        console.print(f"[red]File not found:[/red] {path}")
-        raise typer.Exit(1)
+        path_error(path, "File not found", json_output)
     if path.is_dir():
-        console.print(f"[red]Expected an AGENTS.md file, got directory:[/red] {path}")
-        raise typer.Exit(1)
+        path_error(path, "Expected an AGENTS.md file, got directory", json_output)
 
     markdown = path.read_text(encoding="utf-8")
     headings = extract_headings(markdown)
@@ -226,7 +289,10 @@ def check(
     results = [check_requirement(requirement, headings, body) for requirement in REQUIREMENTS]
     score = score_results(results)
 
-    render_report(path, results, score)
+    if json_output:
+        print_json_report(build_json_report(path, results, score))
+    else:
+        render_report(path, results, score)
 
     if score < 80:
         raise typer.Exit(1)

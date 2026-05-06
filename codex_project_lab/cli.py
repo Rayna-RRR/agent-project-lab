@@ -1,4 +1,4 @@
-"""CLI entry point for Codex Project Lab."""
+"""CLI entry point for Agent Project Lab."""
 
 import typer
 

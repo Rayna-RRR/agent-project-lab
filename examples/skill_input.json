@@ -1,0 +1,19 @@
+{
+  "skill_name": "repo onboarding",
+  "description": "Use when an agent needs to understand a new repository before making code changes.",
+  "when_to_use": "When starting work in an unfamiliar repo or after a long break from the project.",
+  "when_not_to_use": "Do not use for tiny edits where the target file and acceptance criteria are already clear.",
+  "required_inputs": [
+    "Repository path",
+    "User goal",
+    "Known constraints"
+  ],
+  "workflow_steps": [
+    "Inspect the README, AGENTS.md, pyproject/package config, and tests.",
+    "Identify setup, test, lint, and run commands.",
+    "Summarize project purpose, layout, risks, and next steps."
+  ],
+  "output_format": "A concise Markdown briefing with commands, architecture notes, risks, and recommended next action.",
+  "quality_bar": "The briefing is grounded in files that were actually inspected and avoids unsupported claims.",
+  "failure_handling": "If key files are missing or commands cannot be inferred, report the blocker and ask for the minimum missing context."
+}

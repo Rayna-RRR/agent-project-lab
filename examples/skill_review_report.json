@@ -1,0 +1,28 @@
+{
+  "path": ".agents/skills/repo-onboarding/SKILL.md",
+  "status": "PASS",
+  "score": 100,
+  "passed": true,
+  "strengths": [
+    "YAML frontmatter",
+    "Frontmatter name",
+    "Description trigger",
+    "Workflow steps"
+  ],
+  "missing_items": [],
+  "suggestions": [],
+  "checks": [
+    {
+      "name": "YAML frontmatter",
+      "status": "PASS",
+      "evidence": "Found --- frontmatter block",
+      "suggestion": ""
+    },
+    {
+      "name": "Workflow steps",
+      "status": "PASS",
+      "evidence": "Found workflow guidance",
+      "suggestion": ""
+    }
+  ]
+}

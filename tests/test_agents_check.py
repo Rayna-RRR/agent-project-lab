@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -127,3 +128,65 @@ def test_agents_check_custom_file_path_works(tmp_path: Path):
 
         assert result.exit_code == 0
         assert str(custom_path) in result.output
+
+
+def test_agents_check_json_complete_file_passes(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("AGENTS.md").write_text(COMPLETE_AGENTS, encoding="utf-8")
+
+        result = runner.invoke(app, ["agents", "check", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 0
+        assert payload["status"] == "PASS"
+        assert payload["score"] == 100
+        assert payload["passed"] is True
+        assert payload["missing_items"] == []
+        assert payload["checks"][0]["name"] == "Project purpose"
+
+
+def test_agents_check_json_weak_file_fails(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("AGENTS.md").write_text(WEAK_AGENTS, encoding="utf-8")
+
+        result = runner.invoke(app, ["agents", "check", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "FAIL"
+        assert payload["score"] < 80
+        assert "Setup command" in payload["missing_items"]
+        assert payload["suggestions"]
+
+
+def test_agents_check_json_missing_file_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(app, ["agents", "check", "missing/AGENTS.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "ERROR"
+        assert payload["passed"] is False
+        assert payload["error"] == "File not found"
+
+
+def test_agents_check_json_custom_file_path_works(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        custom_path = Path("docs/AGENTS.custom.md")
+        custom_path.parent.mkdir()
+        custom_path.write_text(COMPLETE_AGENTS, encoding="utf-8")
+
+        result = runner.invoke(app, ["agents", "check", str(custom_path), "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 0
+        assert payload["path"] == str(custom_path)
+        assert payload["status"] == "PASS"
