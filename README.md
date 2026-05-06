@@ -262,4 +262,4 @@ ruff check .
 
 ## License
 
-MIT, as declared in [pyproject.toml](pyproject.toml).
+MIT. See [LICENSE](LICENSE).
