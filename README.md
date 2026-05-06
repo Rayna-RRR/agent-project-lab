@@ -1,42 +1,68 @@
 # Agent Project Lab
 
-Agent Project Lab is a local-first CLI for turning rough project ideas into reusable AI coding agent workflows: project briefs, `AGENTS.md` rules, task packs, Agent Skills, and agent run logs.
+**Local-first CLI for turning rough project ideas into agent-ready AI coding agent workflows.**
 
-This repository still ships the Python package as `codex-project-lab`, but the workflow assets are platform-agnostic. They can support Codex, Qwen Code, Claude Code, Cursor, Gemini CLI, Copilot agent, or a manual prompt-based workflow without directly integrating with those products.
+Agent Project Lab helps builders create and maintain the workflow assets that make AI-assisted development more repeatable: `PROJECT_BRIEF.md`, `AGENTS.md`, `TASKS.md`, Agent Skills, and agent run logs.
 
-It does not replace any AI coding tool. It helps builders use AI coding agents better by making project context, rules, prompts, skills, and lessons explicit enough to reuse.
+It is platform-agnostic by design. The tool writes local Markdown and reads local JSON; it does not directly integrate with, call, authenticate with, or replace any AI coding agent.
 
-## Why This Exists
+## Demo Flow
 
-AI coding sessions often start with scattered context: a vague idea, a few rules in chat, missing setup commands, and no durable record of what worked. That makes each new session slower and less consistent, regardless of which coding agent or LLM workflow is used.
+```bash
+lab init --from-file examples/init_input.json
+lab agents check AGENTS.md --json
+lab skill new --from-file examples/skill_input.json
+lab skill review .agents/skills/repo-onboarding --json
+lab log add --from-file examples/log_entry.json
+```
 
-Agent Project Lab gives builders a lightweight way to capture that structure before and after coding work. The result is a small set of Markdown and JSON files that can travel with a repo and help future agent-assisted sessions start with better context.
+## The Problem
 
-## Problem It Solves
+AI coding agents are powerful, but the surrounding workflow is often messy:
 
-- Turns rough ideas into a practical project brief.
-- Creates an `AGENTS.md` file with setup, test, lint, run, done, and do-not-build guidance.
-- Creates starter task prompts that can be reused across agent sessions.
-- Drafts reusable Agent Skills under `.agents/skills/`.
-- Reviews `AGENTS.md` and `SKILL.md` files with deterministic local checks.
-- Keeps a simple append-only log of agent-assisted runs and lessons learned.
-- Supports scripted workflows with local JSON input files and JSON checker output.
+- project intent lives in chat history,
+- setup and verification commands are missing or stale,
+- repository rules are scattered across docs,
+- reusable skills are not captured,
+- run logs and lessons are lost between sessions.
 
-## Why This Is Platform-Agnostic
+Agent Project Lab structures those assets locally so a human or AI coding agent can start with clearer context, safer boundaries, and reusable prompts.
 
-Agent Project Lab writes plain Markdown and reads local JSON. It does not call, authenticate with, or directly integrate with any AI coding product.
+## What This Tool Does
 
-The outputs are useful anywhere a human or coding agent needs project context:
+- Guides a rough project idea into an agent-ready project brief.
+- Generates `AGENTS.md` with purpose, layout, commands, done criteria, do-not-build rules, and update rules.
+- Generates `TASKS.md` with reusable task prompts.
+- Creates Agent Skill drafts under `.agents/skills/<skill-name>/SKILL.md`.
+- Reviews `AGENTS.md` and `SKILL.md` with deterministic local checks.
+- Appends structured run logs to `logs/agent_runs.md`.
+- Supports scripted workflows with JSON input files.
+- Supports machine-readable JSON reports for checker commands.
 
-- `PROJECT_BRIEF.md` explains what the project is and what matters.
-- `AGENTS.md` captures repo rules, commands, constraints, and done criteria.
-- `TASKS.md` stores reusable task prompts.
-- `.agents/skills/<name>/SKILL.md` stores reusable workflow instructions.
-- `logs/agent_runs.md` stores append-only agent run logs.
+## What This Tool Does Not Do
 
-Compatible workflows can include Codex, Qwen Code, Claude Code, Cursor, Gemini CLI, Copilot agent, or manual LLM-assisted development. This is compatibility by file format and workflow structure, not direct product integration.
+- It does not replace any AI coding agent.
+- It does not execute coding-agent tasks.
+- It does not provide a Web UI or TUI.
+- It does not use a database.
+- It does not make external API calls.
+- It does not directly integrate with any AI coding product.
+- It is not a production agent platform.
 
-## Install
+## Feature Overview
+
+| Area | v0.2.0 capability |
+| --- | --- |
+| Project setup | `lab init` and `lab init --from-file JSON` |
+| Agent guidance | `lab agents check` and `lab agents check --json` |
+| Skill drafting | `lab skill new` and `lab skill new --from-file JSON` |
+| Skill review | `lab skill review` and `lab skill review --json` |
+| Run logs | `lab log add`, `lab log add --from-file JSON`, `lab log add --dry-run` |
+| Validation | Pydantic models for structured JSON input |
+| Quality checks | pytest test suite and Ruff linting |
+| Examples | Sample JSON inputs, generated Markdown, and JSON reports |
+
+## Installation
 
 ```bash
 python -m venv .venv
@@ -70,26 +96,36 @@ lab agents check AGENTS.md --json
 lab skill new --from-file examples/skill_input.json --force
 lab skill review .agents/skills/repo-onboarding --json
 lab log add --from-file examples/log_entry.json
+```
+
+Dry-run a log entry without writing:
+
+```bash
 lab log add --from-file examples/log_entry.json --dry-run
 ```
 
-The generated files are local Markdown files. There is no database, hosted service, external API call, or direct product integration in v0.2.0.
+## Full Command Overview
 
-## Command Overview
+| Command | Output | Notes |
+| --- | --- | --- |
+| `lab init` | `PROJECT_BRIEF.md`, `AGENTS.md`, `TASKS.md` | Interactive prompts. Refuses to overwrite generated files unless `--force` is used. |
+| `lab init --from-file PATH` | `PROJECT_BRIEF.md`, `AGENTS.md`, `TASKS.md` | Reads local JSON instead of prompting. |
+| `lab agents check [PATH]` | Rich terminal report | Defaults to `AGENTS.md`. Exits `0` when score is at least `80`, otherwise `1`. |
+| `lab agents check [PATH] --json` | JSON report | Machine-readable checker result for scripts. |
+| `lab skill new` | `.agents/skills/<skill-name>/SKILL.md` | Interactive prompts. Skill name is normalized to lowercase kebab-case. |
+| `lab skill new --from-file PATH` | `.agents/skills/<skill-name>/SKILL.md` | Reads local JSON instead of prompting. |
+| `lab skill review PATH` | Rich terminal report | Accepts a direct `SKILL.md` path or a skill directory containing `SKILL.md`. |
+| `lab skill review PATH --json` | JSON report | Machine-readable skill quality report for scripts. |
+| `lab log add` | `logs/agent_runs.md` | Interactive append-only run log entry. |
+| `lab log add --from-file PATH` | `logs/agent_runs.md` | Reads local JSON instead of prompting. |
+| `lab log add --file PATH` | Custom Markdown log | Appends to a custom log file. |
+| `lab log add --dry-run` | Terminal output only | Prints the generated entry without writing a file. |
 
-| Command | Purpose |
-| --- | --- |
-| `lab init [--force] [--from-file path.json]` | Ask structured project questions or read JSON input, then generate `PROJECT_BRIEF.md`, `AGENTS.md`, and `TASKS.md`. |
-| `lab agents check [path] [--json]` | Score whether an `AGENTS.md` file contains useful AI coding agent guidance. Rich output is default; `--json` prints a machine-readable report. |
-| `lab skill new [--force] [--from-file path.json]` | Create `.agents/skills/<skill-name>/SKILL.md` from prompts or JSON input. |
-| `lab skill review PATH [--json]` | Review a `SKILL.md` file or skill directory for practical skill-design quality. Rich output is default; `--json` prints a machine-readable report. |
-| `lab log add [--file path] [--dry-run] [--from-file path.json]` | Append an agent run log entry to `logs/agent_runs.md`, append to a custom file, or print the entry without writing. |
+## Scripted Workflows With JSON
 
-## JSON Input Files
+v0.2.0 supports JSON only for `--from-file`. This keeps automation dependency-light and easy to validate with Pydantic.
 
-v0.2.0 supports JSON only for `--from-file`. YAML, JSON Schema export, and schema migrations are intentionally postponed.
-
-Project init input:
+Example project input:
 
 ```json
 {
@@ -108,128 +144,114 @@ Project init input:
 }
 ```
 
-Skill input and log input examples are available in [examples/skill_input.json](examples/skill_input.json) and [examples/log_entry.json](examples/log_entry.json).
+See the complete sample files:
 
-## JSON Reports
+- [examples/init_input.json](examples/init_input.json)
+- [examples/skill_input.json](examples/skill_input.json)
+- [examples/log_entry.json](examples/log_entry.json)
 
-Checker commands keep Rich terminal reports by default. Add `--json` when a script needs machine-readable output:
+## JSON Output Examples
 
-```bash
-lab agents check AGENTS.md --json
-lab skill review .agents/skills/repo-onboarding --json
+Checker commands use Rich output by default. Add `--json` when a script needs a stable machine-readable report.
+
+`lab agents check AGENTS.md --json`:
+
+```json
+{
+  "path": "AGENTS.md",
+  "status": "PASS",
+  "score": 100,
+  "passed": true,
+  "missing_items": [],
+  "suggestions": []
+}
 ```
 
-Reports include `status`, `score`, `passed`, individual `checks`, missing items, and suggestions. Exit codes remain the same as the Rich output: `0` when the score is at least `80`, otherwise `1`.
+`lab skill review .agents/skills/repo-onboarding --json`:
 
-## Demo Workflow
+```json
+{
+  "path": ".agents/skills/repo-onboarding/SKILL.md",
+  "status": "PASS",
+  "score": 100,
+  "passed": true,
+  "strengths": ["YAML frontmatter", "Frontmatter name", "Workflow steps"],
+  "missing_items": [],
+  "suggestions": []
+}
+```
 
-Start with a rough idea:
+Full sample reports:
+
+- [examples/agents_check_report.json](examples/agents_check_report.json)
+- [examples/skill_review_report.json](examples/skill_review_report.json)
+
+## Examples Folder
+
+The [examples/](examples/) folder shows short, realistic inputs and outputs:
+
+- `sample_project_idea.md`: rough starting idea,
+- `sample_generated_PROJECT_BRIEF.md`: generated project brief,
+- `sample_generated_AGENTS.md`: generated agent guidance,
+- `sample_generated_TASKS.md`: generated task prompt pack,
+- `sample_skill.md`: sample Agent Skill,
+- `sample_agent_runs.md`: sample run log,
+- `*_input.json`: scripted workflow inputs,
+- `*_report.json`: machine-readable checker outputs.
+
+## Project Structure
 
 ```text
-I want to build a small local-first CLI that helps solo developers clean up README files.
+codex-project-lab/
+  codex_project_lab/
+    cli.py
+    models.py
+    commands/
+    templates/
+  examples/
+  tests/
+  AGENTS.md
+  CHANGELOG.md
+  README.md
+  pyproject.toml
 ```
 
-Run:
+## v0.2.0 Scope
 
-```bash
-lab init
-```
-
-Answer the prompts with the project idea, target users, MVP scope, tech stack, commands, do-not-build rules, and done criteria. The command generates:
-
-```text
-PROJECT_BRIEF.md
-AGENTS.md
-TASKS.md
-```
-
-Then check the agent guidance:
-
-```bash
-lab agents check AGENTS.md
-```
-
-Draft a reusable skill for future sessions:
-
-```bash
-lab skill new
-lab skill review .agents/skills/readme-review
-```
-
-After an AI coding agent session, capture what happened:
-
-```bash
-lab log add
-```
-
-See [examples/](examples/) for short sample inputs and outputs.
-
-## Before And After
-
-Before:
-
-```text
-Build a README cleanup CLI. It should be local and probably use Python.
-```
-
-After `lab init`:
-
-```text
-PROJECT_BRIEF.md
-- Project idea, users, problem, MVP scope, commands, constraints, done criteria
-
-AGENTS.md
-- Project purpose, repo layout, setup/test/lint/run commands, do-not-build rules
-
-TASKS.md
-- Starter agent task prompts with context and acceptance criteria
-```
-
-After `lab skill new`:
-
-```text
-.agents/skills/readme-review/SKILL.md
-- Description, triggers, non-triggers, required inputs, workflow, output format, quality bar, failure handling
-```
-
-After `lab log add`:
-
-```text
-logs/agent_runs.md
-- Timestamped notes on agent/tool used, prompt, changed files, verification, results, lessons, and next step
-```
-
-## Current v0.2.0 Scope
-
-- Python CLI using Typer and Rich.
+- Local-first Python CLI using Typer and Rich.
 - Jinja2 Markdown templates.
-- Pydantic validation for local JSON input files.
-- Local generation of `PROJECT_BRIEF.md`, `AGENTS.md`, `TASKS.md`, `SKILL.md`, and agent run logs.
-- Practical keyword/heading checks for `AGENTS.md` and `SKILL.md`.
+- Pydantic validation for structured JSON inputs.
+- Deterministic local checks for `AGENTS.md` and `SKILL.md`.
 - Machine-readable JSON output for checker commands.
-- pytest coverage for implemented command behavior.
-
-## Intentionally Not Included
-
-- No Web UI or TUI.
-- No database or search index.
-- No external AI/API calls.
-- No direct integration with Codex, Qwen Code, Claude Code, Cursor, Gemini CLI, Copilot agent, or other coding tools.
-- No automatic coding-agent execution.
-- No YAML input support in v0.2.0.
-- No claim of production readiness; v0.2.0 is a portfolio-ready local workflow tool.
+- pytest coverage for CLI behavior.
+- Ruff linting.
+- No Web UI, database, external API calls, hidden network calls, or direct product integrations.
 
 ## v0.3 Roadmap
 
-- YAML input support if users need it.
+Potential next steps:
+
+- YAML input support if there is a clear need.
 - JSON Schema export for input files and reports.
 - Schema versioning and migrations.
 - Field-by-field non-interactive CLI flags.
-- Configurable template packages and template versioning.
+- Configurable template packs.
 - Stronger Markdown parsing.
 - Optional project profile files for repeatable defaults.
 - SARIF or richer report formats.
 - Automatic repair suggestions for `AGENTS.md` or `SKILL.md`.
+
+## Portfolio And Learning Value
+
+Agent Project Lab is intentionally small, local, and inspectable. It demonstrates:
+
+- CLI product design with a clear v0.1 to v0.2 evolution,
+- practical use of Typer, Rich, Pydantic, Jinja2, pytest, and Ruff,
+- deterministic quality checks without external AI calls,
+- platform-agnostic workflow design for AI-assisted development,
+- testable automation features that preserve interactive UX.
+
+The project is portfolio-ready, but it avoids claiming to be a production agent platform.
 
 ## Development
 
@@ -237,3 +259,7 @@ logs/agent_runs.md
 pytest
 ruff check .
 ```
+
+## License
+
+MIT, as declared in [pyproject.toml](pyproject.toml).
