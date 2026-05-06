@@ -202,8 +202,8 @@ The [examples/](examples/) folder shows short, realistic inputs and outputs:
 ## Project Structure
 
 ```text
-codex-project-lab/
-  codex_project_lab/
+agent-project-lab/
+  agent_project_lab/
     cli.py
     models.py
     commands/

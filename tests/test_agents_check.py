@@ -3,7 +3,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from codex_project_lab.cli import app
+from agent_project_lab.cli import app
 
 COMPLETE_AGENTS = """# AGENTS.md
 
@@ -13,7 +13,7 @@ Help builders structure agent-ready project workflows.
 
 ## Repo Layout
 
-- `codex_project_lab/`: CLI package.
+- `agent_project_lab/`: CLI package.
 - `tests/`: pytest tests.
 
 ## Setup Command
@@ -64,6 +64,46 @@ Run tests sometimes.
 """
 
 
+PLACEHOLDER_AGENTS = """# AGENTS.md
+
+## Project Purpose
+
+TBD
+
+## Repo Layout
+
+TBD
+
+## Setup Command
+
+TBD
+
+## Test Command
+
+TBD
+
+## Lint Command
+
+TBD
+
+## Run Command
+
+TBD
+
+## Done Criteria
+
+TBD
+
+## Do-Not-Build Rules
+
+TBD
+
+## Update Rules
+
+TBD
+"""
+
+
 def test_agents_check_complete_file_passes(tmp_path: Path):
     runner = CliRunner()
 
@@ -90,6 +130,22 @@ def test_agents_check_weak_file_fails(tmp_path: Path):
         assert "FAIL" in result.output
         assert "Missing items" in result.output
         assert "Setup command" in result.output
+
+
+def test_agents_check_placeholder_sections_fail(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("AGENTS.md").write_text(PLACEHOLDER_AGENTS, encoding="utf-8")
+
+        result = runner.invoke(app, ["agents", "check", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "FAIL"
+        assert payload["checks"][0]["evidence"].startswith(
+            "Found heading with empty or placeholder content"
+        )
 
 
 def test_agents_check_missing_file_errors(tmp_path: Path):

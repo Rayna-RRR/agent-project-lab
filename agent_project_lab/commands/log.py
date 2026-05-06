@@ -1,14 +1,15 @@
 """Agent run log commands."""
 
 from datetime import datetime
+from os import SEEK_END
 from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
-from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.console import Console
 
-from codex_project_lab.models import InputFileError, RunLogInput, load_json_model
+from agent_project_lab.models import InputFileError, RunLogInput, load_json_model
+from agent_project_lab.render import render_markdown_template
 
 console = Console()
 
@@ -34,18 +35,13 @@ def current_timestamp() -> str:
 def render_log_template(include_header: bool, entry: dict[str, str]) -> str:
     """Render the packaged agent run log template."""
 
-    environment = Environment(
-        loader=PackageLoader("codex_project_lab", "templates"),
-        autoescape=select_autoescape(enabled_extensions=()),
-        keep_trailing_newline=True,
-        lstrip_blocks=True,
-        trim_blocks=True,
+    return render_markdown_template(
+        "agent_runs.md.j2",
+        {
+            "include_header": include_header,
+            "entry": entry,
+        },
     )
-    rendered = environment.get_template("agent_runs.md.j2").render(
-        include_header=include_header,
-        entry=entry,
-    )
-    return rendered if rendered.endswith("\n") else f"{rendered}\n"
 
 
 def collect_entry() -> dict[str, str]:
@@ -79,6 +75,17 @@ def load_entry_from_file(path: Path) -> dict[str, str]:
     except InputFileError as exc:
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(1) from exc
+
+
+def file_ends_with_newline(path: Path) -> bool:
+    """Return whether an existing file is empty or ends with a newline."""
+
+    if path.stat().st_size == 0:
+        return True
+
+    with path.open("rb") as file:
+        file.seek(-1, SEEK_END)
+        return file.read(1) == b"\n"
 
 
 def add(
@@ -125,9 +132,9 @@ def add(
 
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists():
-        existing = target.read_text(encoding="utf-8")
-        separator = "" if existing.endswith("\n") else "\n"
-        target.write_text(f"{existing}{separator}{rendered}", encoding="utf-8")
+        separator = "" if file_ends_with_newline(target) else "\n"
+        with target.open("a", encoding="utf-8") as file:
+            file.write(f"{separator}{rendered}")
     else:
         target.write_text(rendered, encoding="utf-8")
 

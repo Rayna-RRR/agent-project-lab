@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from codex_project_lab.cli import app
+from agent_project_lab.cli import app
 
 
 def test_lab_help_lists_v01_commands():

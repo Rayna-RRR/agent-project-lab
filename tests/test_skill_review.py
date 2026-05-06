@@ -3,7 +3,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from codex_project_lab.cli import app
+from agent_project_lab.cli import app
 
 STRONG_SKILL = """---
 name: review-skill-draft
@@ -57,6 +57,44 @@ This is a helper.
 """
 
 
+PLACEHOLDER_SECTION_SKILL = """---
+name: review-skill-draft
+description: Use when a user asks to review an Agent Skill draft for trigger clarity,
+  workflow quality, and failure handling.
+---
+
+# Review Skill Draft
+
+## When To Use This Skill
+
+TBD
+
+## When Not To Use This Skill
+
+TBD
+
+## Required Inputs
+
+TBD
+
+## Workflow Steps
+
+TBD
+
+## Output Format
+
+TBD
+
+## Quality Bar
+
+TBD
+
+## Failure Handling
+
+TBD
+"""
+
+
 INVALID_NAME_SKILL = STRONG_SKILL.replace("name: review-skill-draft", "name: Review Skill Draft")
 
 
@@ -86,6 +124,21 @@ def test_skill_review_weak_skill_fails(tmp_path: Path):
         assert "FAIL" in result.output
         assert "Missing items" in result.output
         assert "YAML frontmatter" in result.output
+
+
+def test_skill_review_placeholder_sections_fail(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("SKILL.md").write_text(PLACEHOLDER_SECTION_SKILL, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", "SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "FAIL"
+        assert "Workflow steps" in payload["missing_items"]
+        assert "Failure handling" in payload["missing_items"]
 
 
 def test_skill_review_directory_path_works(tmp_path: Path):

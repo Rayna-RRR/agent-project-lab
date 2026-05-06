@@ -4,8 +4,8 @@
   "agent_tool_used": "Manual prompt-based agent workflow",
   "prompt_summary": "Implement --from-file for lab init and preserve interactive behavior.",
   "changed_files": [
-    "codex_project_lab/commands/init.py",
-    "codex_project_lab/models.py",
+    "agent_project_lab/commands/init.py",
+    "agent_project_lab/models.py",
     "tests/test_init_command.py"
   ],
   "verification_command": "pytest",

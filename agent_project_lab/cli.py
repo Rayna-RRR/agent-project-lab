@@ -2,7 +2,7 @@
 
 import typer
 
-from codex_project_lab.commands import agents, init, log, skill
+from agent_project_lab.commands import agents, init, log, skill
 
 app = typer.Typer(
     help="Local-first tools for shaping AI coding agent context, tasks, skills, and logs.",

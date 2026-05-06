@@ -6,7 +6,7 @@ Append-only notes from AI coding agent runs. Use this file to capture tools used
 
 ### Agent/Tool Used
 
-Codex
+Manual LLM-assisted workflow
 
 ### Task Goal
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from codex_project_lab.cli import app
+from agent_project_lab.cli import app
 
 SKILL_INPUT = "\n".join(
     [
@@ -77,6 +77,21 @@ def test_skill_new_does_not_overwrite_without_force(tmp_path: Path):
         assert result.exit_code == 1
         assert "Refusing to overwrite" in result.output
         assert skill_path.read_text(encoding="utf-8") == "existing skill"
+
+
+def test_skill_new_refuses_existing_skill_before_prompting_for_details(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
+        skill_path.parent.mkdir(parents=True)
+        skill_path.write_text("existing skill", encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "new"], input="Review Skill Draft\n")
+
+        assert result.exit_code == 1
+        assert "Refusing to overwrite" in result.output
+        assert "One-sentence description" not in result.output
 
 
 def test_skill_new_force_overwrites_existing_skill(tmp_path: Path):

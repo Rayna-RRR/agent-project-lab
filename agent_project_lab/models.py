@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Type, TypeVar
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -75,6 +75,8 @@ def load_json_model(path: Path, model_type: Type[T]) -> T:
         data = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise InputFileError(f"Invalid JSON in {path}: {exc.msg}") from exc
+    except UnicodeDecodeError as exc:
+        raise InputFileError(f"Input file must be UTF-8 text: {path}") from exc
     except OSError as exc:
         raise InputFileError(f"Could not read input file {path}: {exc}") from exc
 
@@ -89,6 +91,8 @@ def load_json_model(path: Path, model_type: Type[T]) -> T:
 
 class ProjectInitInput(BaseModel):
     """Structured input for non-interactive `lab init`."""
+
+    model_config = ConfigDict(extra="forbid")
 
     project_name: str
     project_idea: str
@@ -145,6 +149,8 @@ class ProjectInitInput(BaseModel):
 class SkillNewInput(BaseModel):
     """Structured input for non-interactive `lab skill new`."""
 
+    model_config = ConfigDict(extra="forbid")
+
     skill_name: str
     description: str
     when_to_use: str
@@ -193,6 +199,8 @@ class SkillNewInput(BaseModel):
 
 class RunLogInput(BaseModel):
     """Structured input for non-interactive `lab log add`."""
+
+    model_config = ConfigDict(extra="forbid")
 
     task_title: str
     task_goal: str

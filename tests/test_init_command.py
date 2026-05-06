@@ -4,7 +4,7 @@ from typing import Optional
 
 from typer.testing import CliRunner
 
-from codex_project_lab.cli import app
+from agent_project_lab.cli import app
 
 INIT_INPUT = "\n".join(
     [
@@ -41,7 +41,7 @@ PROJECT_JSON = {
 
 
 def write_project_json(path: Path, data: Optional[dict[str, object]] = None) -> None:
-    path.write_text(json.dumps(data or PROJECT_JSON), encoding="utf-8")
+    path.write_text(json.dumps(PROJECT_JSON if data is None else data), encoding="utf-8")
 
 
 def test_init_generates_project_files(tmp_path: Path):
@@ -80,6 +80,19 @@ def test_init_does_not_overwrite_without_force(tmp_path: Path):
         assert Path("PROJECT_BRIEF.md").read_text(encoding="utf-8") == "existing brief"
         assert not Path("AGENTS.md").exists()
         assert not Path("TASKS.md").exists()
+
+
+def test_init_refuses_existing_files_before_prompting(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
+
+        result = runner.invoke(app, ["init"])
+
+        assert result.exit_code == 1
+        assert "Refusing to overwrite" in result.output
+        assert "Project name" not in result.output
 
 
 def test_init_force_overwrites_generated_files(tmp_path: Path):

@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
-from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.console import Console
 
-from codex_project_lab.models import InputFileError, ProjectInitInput, load_json_model
+from agent_project_lab.models import InputFileError, ProjectInitInput, load_json_model
+from agent_project_lab.render import render_markdown_template
 
 console = Console()
 
@@ -76,15 +76,7 @@ def load_project_from_file(path: Path) -> dict[str, object]:
 def render_template(template_name: str, context: dict[str, object]) -> str:
     """Render one packaged Markdown template."""
 
-    environment = Environment(
-        loader=PackageLoader("codex_project_lab", "templates"),
-        autoescape=select_autoescape(enabled_extensions=()),
-        keep_trailing_newline=True,
-        lstrip_blocks=True,
-        trim_blocks=True,
-    )
-    rendered = environment.get_template(template_name).render(**context)
-    return rendered if rendered.endswith("\n") else f"{rendered}\n"
+    return render_markdown_template(template_name, context)
 
 
 def init_project(
@@ -104,8 +96,6 @@ def init_project(
 
     console.print("[bold]Agent Project Lab init[/bold]")
 
-    project = load_project_from_file(from_file) if from_file else collect_project()
-
     target_dir = Path.cwd()
     output_paths = {filename: target_dir / filename for filename in GENERATED_FILES}
     existing_files = [path for path in output_paths.values() if path.exists()]
@@ -116,6 +106,8 @@ def init_project(
             console.print(f"- {path.name}")
         console.print("Re-run with --force to overwrite these files.")
         raise typer.Exit(1)
+
+    project = load_project_from_file(from_file) if from_file else collect_project()
 
     generated: list[Path] = []
     for filename, template_name in GENERATED_FILES.items():

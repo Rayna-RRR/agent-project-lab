@@ -5,7 +5,7 @@ from typing import Optional
 
 from typer.testing import CliRunner
 
-from codex_project_lab.cli import app
+from agent_project_lab.cli import app
 
 LOG_INPUT = "\n".join(
     [
@@ -13,7 +13,7 @@ LOG_INPUT = "\n".join(
         "Capture AI coding agent run details in Markdown.",
         "Qwen Code",
         "Asked an AI coding agent to implement the log add feature.",
-        "codex_project_lab/commands/log.py, tests/test_log_add.py",
+        "agent_project_lab/commands/log.py, tests/test_log_add.py",
         "pytest",
         "19 passed",
         "CliRunner made the append behavior easy to verify.",
@@ -29,7 +29,7 @@ LOG_JSON = {
     "task_goal": "Make log add usable from scripts.",
     "agent_tool_used": "Agent Project Lab",
     "prompt_summary": "Implement --from-file for lab log add.",
-    "changed_files": ["codex_project_lab/commands/log.py", "tests/test_log_add.py"],
+    "changed_files": ["agent_project_lab/commands/log.py", "tests/test_log_add.py"],
     "verification_command": "pytest",
     "verification_result": "Passed",
     "what_worked": "The same template worked for interactive and file-based input.",
@@ -40,7 +40,7 @@ LOG_JSON = {
 
 
 def write_log_json(path: Path, data: Optional[dict[str, object]] = None) -> None:
-    path.write_text(json.dumps(data or LOG_JSON), encoding="utf-8")
+    path.write_text(json.dumps(LOG_JSON if data is None else data), encoding="utf-8")
 
 
 def test_log_add_creates_new_log_file(tmp_path: Path):
@@ -70,6 +70,21 @@ def test_log_add_appends_second_entry(tmp_path: Path):
         assert second.exit_code == 0
         assert content.count("# Agent Run Logs") == 1
         assert len(re.findall(r"^## \d{4}-\d{2}-\d{2}", content, flags=re.MULTILINE)) == 2
+
+
+def test_log_add_appends_after_existing_file_without_trailing_newline(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        log_file = Path("logs/agent_runs.md")
+        log_file.parent.mkdir()
+        log_file.write_text("existing entry", encoding="utf-8")
+
+        result = runner.invoke(app, ["log", "add"], input=LOG_INPUT)
+        content = log_file.read_text(encoding="utf-8")
+
+        assert result.exit_code == 0
+        assert content.startswith("existing entry\n## ")
 
 
 def test_log_add_custom_file_path_works(tmp_path: Path):
@@ -157,7 +172,7 @@ def test_log_add_from_file_creates_new_log_file(tmp_path: Path):
         content = log_file.read_text(encoding="utf-8")
         assert "# Agent Run Logs" in content
         assert "Add JSON input support" in content
-        assert "- codex_project_lab/commands/log.py" in content
+        assert "- agent_project_lab/commands/log.py" in content
 
 
 def test_log_add_from_file_appends_second_entry(tmp_path: Path):

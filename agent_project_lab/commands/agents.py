@@ -3,14 +3,14 @@
 import json as json_module
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from codex_project_lab.models import AgentCheckReport, ReportCheck
+from agent_project_lab.models import AgentCheckReport, ReportCheck
 
 console = Console()
 
@@ -32,6 +32,12 @@ class CheckResult:
     requirement: Requirement
     status: str
     evidence: str
+
+
+@dataclass(frozen=True)
+class HeadingSection:
+    heading: str
+    content: str
 
 
 REQUIREMENTS = (
@@ -87,7 +93,6 @@ REQUIREMENTS = (
             "do not change",
             "do not rules",
             "do not build items",
-            "do not rules",
         ),
         body_keywords=("do not", "do-not", "do not build", "do not change", "do-not-build"),
         suggestion="Add boundaries for what an AI coding agent should avoid building or changing.",
@@ -102,37 +107,76 @@ REQUIREMENTS = (
 
 
 def normalize(text: str) -> str:
-    """Normalize text for practical v0.1 keyword checks."""
+    """Normalize text for practical keyword checks."""
 
     return " ".join(text.lower().replace("-", " ").replace("_", " ").split())
 
 
-def extract_headings(markdown: str) -> list[str]:
-    """Return normalized Markdown headings."""
+def extract_heading_sections(markdown: str) -> list[HeadingSection]:
+    """Return normalized Markdown headings with their section content."""
 
-    headings = []
+    sections: list[HeadingSection] = []
+    current_heading: Optional[str] = None
+    current_content: list[str] = []
+
+    def append_current_section() -> None:
+        if current_heading is not None:
+            sections.append(HeadingSection(current_heading, "\n".join(current_content).strip()))
+
     for line in markdown.splitlines():
         stripped = line.strip()
         if stripped.startswith("#"):
+            append_current_section()
             heading = stripped.lstrip("#").strip()
-            if heading:
-                headings.append(normalize(heading))
-    return headings
+            current_heading = normalize(heading) if heading else None
+            current_content = []
+        elif current_heading is not None:
+            current_content.append(line)
+
+    append_current_section()
+    return sections
 
 
-def check_requirement(requirement: Requirement, headings: list[str], body: str) -> CheckResult:
+def section_has_useful_content(content: str) -> bool:
+    """Return whether a Markdown section contains more than placeholder text."""
+
+    normalized = normalize(content)
+    placeholders = {
+        "tbd",
+        "todo",
+        "to do",
+        "to be decided",
+        "none",
+        "n/a",
+        "na",
+        "coming soon",
+    }
+    return bool(normalized) and normalized not in placeholders
+
+
+def check_requirement(
+    requirement: Requirement,
+    sections: list[HeadingSection],
+    body: str,
+) -> CheckResult:
     """Check one requirement using headings first, then body keywords."""
 
     heading_match = next(
         (
-            heading
-            for heading in headings
-            if any(keyword in heading for keyword in requirement.heading_keywords)
+            section
+            for section in sections
+            if any(keyword in section.heading for keyword in requirement.heading_keywords)
         ),
         None,
     )
     if heading_match:
-        return CheckResult(requirement, PASS, f"Found heading: {heading_match}")
+        if section_has_useful_content(heading_match.content):
+            return CheckResult(requirement, PASS, f"Found heading: {heading_match.heading}")
+        return CheckResult(
+            requirement,
+            FAIL,
+            f"Found heading with empty or placeholder content: {heading_match.heading}",
+        )
 
     body_match = next(
         (keyword for keyword in requirement.body_keywords if normalize(keyword) in body),
@@ -284,9 +328,9 @@ def check(
         path_error(path, "Expected an AGENTS.md file, got directory", json_output)
 
     markdown = path.read_text(encoding="utf-8")
-    headings = extract_headings(markdown)
+    sections = extract_heading_sections(markdown)
     body = normalize(markdown)
-    results = [check_requirement(requirement, headings, body) for requirement in REQUIREMENTS]
+    results = [check_requirement(requirement, sections, body) for requirement in REQUIREMENTS]
     score = score_results(results)
 
     if json_output:

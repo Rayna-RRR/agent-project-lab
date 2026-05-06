@@ -7,18 +7,18 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
-from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from codex_project_lab.models import (
+from agent_project_lab.models import (
     InputFileError,
     ReportCheck,
     SkillNewInput,
     SkillReviewReport,
     load_json_model,
 )
+from agent_project_lab.render import render_markdown_template
 
 console = Console()
 
@@ -39,6 +39,12 @@ class ReviewResult:
     requirement: ReviewRequirement
     passed: bool
     evidence: str
+
+
+@dataclass(frozen=True)
+class HeadingSection:
+    heading: str
+    content: str
 
 
 REVIEW_REQUIREMENTS = (
@@ -123,15 +129,7 @@ def normalize_skill_name(name: str) -> str:
 def render_skill_template(skill: dict[str, object]) -> str:
     """Render the packaged skill template."""
 
-    environment = Environment(
-        loader=PackageLoader("codex_project_lab", "templates"),
-        autoescape=select_autoescape(enabled_extensions=()),
-        keep_trailing_newline=True,
-        lstrip_blocks=True,
-        trim_blocks=True,
-    )
-    rendered = environment.get_template("skill.md.j2").render(skill=skill)
-    return rendered if rendered.endswith("\n") else f"{rendered}\n"
+    return render_markdown_template("skill.md.j2", {"skill": skill})
 
 
 def normalize_text(value: str) -> str:
@@ -167,26 +165,68 @@ def parse_frontmatter(markdown: str) -> tuple[dict[str, str], str, bool]:
     return frontmatter, body, True
 
 
-def extract_headings(markdown: str) -> list[str]:
-    """Return normalized Markdown headings."""
+def extract_heading_sections(markdown: str) -> list[HeadingSection]:
+    """Return normalized Markdown headings with their section content."""
 
-    headings = []
+    sections: list[HeadingSection] = []
+    current_heading: Optional[str] = None
+    current_content: list[str] = []
+
+    def append_current_section() -> None:
+        if current_heading is not None:
+            sections.append(HeadingSection(current_heading, "\n".join(current_content).strip()))
+
     for line in markdown.splitlines():
         stripped = line.strip()
         if stripped.startswith("#"):
+            append_current_section()
             heading = stripped.lstrip("#").strip()
-            if heading:
-                headings.append(normalize_text(heading))
-    return headings
+            current_heading = normalize_text(heading) if heading else None
+            current_content = []
+        elif current_heading is not None:
+            current_content.append(line)
+
+    append_current_section()
+    return sections
 
 
-def has_heading_or_keyword(headings: list[str], body: str, keywords: tuple[str, ...]) -> bool:
-    """Check whether a section appears by heading or body keyword."""
+def section_has_useful_content(content: str) -> bool:
+    """Return whether a Markdown section contains more than placeholder text."""
+
+    normalized = normalize_text(content)
+    placeholders = {
+        "tbd",
+        "todo",
+        "to do",
+        "to be decided",
+        "none",
+        "n/a",
+        "na",
+        "coming soon",
+    }
+    return bool(normalized) and normalized not in placeholders
+
+
+def has_section_or_keyword(
+    sections: list[HeadingSection],
+    body: str,
+    keywords: tuple[str, ...],
+) -> bool:
+    """Check whether a useful section appears by heading or body keyword."""
 
     normalized_keywords = tuple(normalize_text(keyword) for keyword in keywords)
-    return any(
-        any(keyword in heading for keyword in normalized_keywords) for heading in headings
-    ) or any(keyword in body for keyword in normalized_keywords)
+    section_match = next(
+        (
+            section
+            for section in sections
+            if any(keyword in section.heading for keyword in normalized_keywords)
+        ),
+        None,
+    )
+    if section_match:
+        return section_has_useful_content(section_match.content)
+
+    return any(keyword in body for keyword in normalized_keywords)
 
 
 def description_is_specific(description: str) -> bool:
@@ -283,7 +323,7 @@ def review_skill_markdown(markdown: str) -> tuple[list[ReviewResult], int, str]:
 
     frontmatter, body_markdown, has_frontmatter = parse_frontmatter(markdown)
     body = normalize_text(body_markdown)
-    headings = extract_headings(body_markdown)
+    sections = extract_heading_sections(body_markdown)
     name = frontmatter.get("name", "")
     description = frontmatter.get("description", "")
 
@@ -307,32 +347,32 @@ def review_skill_markdown(markdown: str) -> tuple[list[ReviewResult], int, str]:
             description or "Missing description",
         ),
         "When to use": (
-            has_heading_or_keyword(headings, body, ("when to use", "use this skill when")),
+            has_section_or_keyword(sections, body, ("when to use", "use this skill when")),
             "Found usage guidance",
         ),
         "When not to use": (
-            has_heading_or_keyword(headings, body, ("when not to use", "do not use")),
+            has_section_or_keyword(sections, body, ("when not to use", "do not use")),
             "Found non-usage guidance",
         ),
         "Required inputs": (
-            has_heading_or_keyword(headings, body, ("required inputs", "inputs")),
+            has_section_or_keyword(sections, body, ("required inputs", "inputs")),
             "Found required inputs guidance",
         ),
         "Workflow steps": (
-            has_heading_or_keyword(headings, body, ("workflow steps", "workflow")),
+            has_section_or_keyword(sections, body, ("workflow steps", "workflow")),
             "Found workflow guidance",
         ),
         "Output format": (
-            has_heading_or_keyword(headings, body, ("output format", "final output")),
+            has_section_or_keyword(sections, body, ("output format", "final output")),
             "Found output guidance",
         ),
         "Quality bar": (
-            has_heading_or_keyword(headings, body, ("quality bar", "quality standard")),
+            has_section_or_keyword(sections, body, ("quality bar", "quality standard")),
             "Found quality guidance",
         ),
         "Failure handling": (
-            has_heading_or_keyword(
-                headings,
+            has_section_or_keyword(
+                sections,
                 body,
                 ("failure handling", "blocker", "missing inputs"),
             ),
@@ -483,7 +523,13 @@ def new(
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(1) from exc
 
-    if skill_input:
+    skill_path = Path(".agents") / "skills" / slug / "SKILL.md"
+    if skill_path.exists() and not force:
+        console.print(f"[red]Refusing to overwrite existing skill:[/red] {skill_path}")
+        console.print("Re-run with --force to overwrite this skill draft.")
+        raise typer.Exit(1)
+
+    if skill_input is not None:
         skill = skill_input.to_template_skill(slug)
     else:
         skill = {
@@ -498,12 +544,6 @@ def new(
             "quality_bar": prompt_required("Quality bar"),
             "failure_handling": prompt_required("Failure handling"),
         }
-
-    skill_path = Path(".agents") / "skills" / slug / "SKILL.md"
-    if skill_path.exists() and not force:
-        console.print(f"[red]Refusing to overwrite existing skill:[/red] {skill_path}")
-        console.print("Re-run with --force to overwrite this skill draft.")
-        raise typer.Exit(1)
 
     skill_path.parent.mkdir(parents=True, exist_ok=True)
     skill_path.write_text(render_skill_template(skill), encoding="utf-8")

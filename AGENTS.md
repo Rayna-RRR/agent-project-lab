@@ -2,13 +2,13 @@
 
 ## Project Purpose
 
-Agent Project Lab helps builders organize project context, project rules, reusable task prompts, Agent Skills, and agent run logs for AI-assisted development. The Python package is still named `codex-project-lab`, but the generated Markdown and JSON assets are platform-agnostic and must not execute or impersonate any AI coding tool.
+Agent Project Lab helps builders organize project context, project rules, reusable task prompts, Agent Skills, and agent run logs for AI-assisted development. The Python package is still named `agent-project-lab`, but the generated Markdown and JSON assets are platform-agnostic and must not execute or impersonate any AI coding tool.
 
 ## Repo Layout
 
-- `codex_project_lab/`: Python package for the CLI, templates, and command handlers.
-- `codex_project_lab/commands/`: Typer command modules grouped by CLI area.
-- `codex_project_lab/templates/`: Jinja2 Markdown templates used for generated files.
+- `agent_project_lab/`: Python package for the CLI, templates, and command handlers.
+- `agent_project_lab/commands/`: Typer command modules grouped by CLI area.
+- `agent_project_lab/templates/`: Jinja2 Markdown templates used for generated files.
 - `examples/`: Short sample inputs and generated Markdown outputs for README/demo use.
 - `tests/`: pytest coverage for CLI behavior and implemented command behavior.
 
@@ -52,7 +52,7 @@ lab --help
 ## Do-Not Rules
 
 - Do not add a web UI, TUI, database, hosted service, or external AI/API integration in v0.2.
-- Do not make this tool execute or replace Codex, Qwen Code, Claude Code, Cursor, Gemini CLI, Copilot agent, or any other AI coding tool.
+- Do not make this tool execute, impersonate, or replace any external AI coding tool.
 - Do not add hidden network calls.
 - Do not generate files outside the user-selected target directory for generation commands.
 - Do not add YAML support unless it is explicitly scoped for a future release.
