@@ -31,7 +31,7 @@ The outputs are useful anywhere a human or coding agent needs project context:
 - `AGENTS.md` captures repo rules, commands, constraints, and done criteria.
 - `TASKS.md` stores reusable task prompts.
 - `.agents/skills/<name>/SKILL.md` stores reusable workflow instructions.
-- `logs/codex_runs.md` stores append-only agent run logs. The filename is kept for v0.1 compatibility, but the content is agent-agnostic.
+- `logs/agent_runs.md` stores append-only agent run logs.
 
 Compatible workflows can include Codex, Qwen Code, Claude Code, Cursor, Gemini CLI, Copilot agent, or manual LLM-assisted development. This is compatibility by file format and workflow structure, not direct product integration.
 
@@ -69,7 +69,7 @@ The generated files are local Markdown files. There is no database, hosted servi
 | `lab agents check [path]` | Score whether an `AGENTS.md` file contains useful AI coding agent guidance. |
 | `lab skill new [--force]` | Create `.agents/skills/<skill-name>/SKILL.md` from interactive prompts. |
 | `lab skill review PATH` | Review a `SKILL.md` file or skill directory for practical skill-design quality. |
-| `lab log add [--file path] [--dry-run]` | Append an agent run log entry to `logs/codex_runs.md` or print it without writing. |
+| `lab log add [--file path] [--dry-run]` | Append an agent run log entry to `logs/agent_runs.md` or print it without writing. |
 
 ## Demo Workflow
 
@@ -145,7 +145,7 @@ After `lab skill new`:
 After `lab log add`:
 
 ```text
-logs/codex_runs.md
+logs/agent_runs.md
 - Timestamped notes on agent/tool used, prompt, changed files, verification, results, lessons, and next step
 ```
 

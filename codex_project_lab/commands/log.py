@@ -10,7 +10,7 @@ from rich.console import Console
 
 console = Console()
 
-DEFAULT_LOG_FILE = Path("logs/codex_runs.md")
+DEFAULT_LOG_FILE = Path("logs/agent_runs.md")
 
 
 def prompt_required(label: str) -> str:
@@ -33,7 +33,7 @@ def render_log_template(include_header: bool, entry: dict[str, str]) -> str:
         lstrip_blocks=True,
         trim_blocks=True,
     )
-    rendered = environment.get_template("codex_runs.md.j2").render(
+    rendered = environment.get_template("agent_runs.md.j2").render(
         include_header=include_header,
         entry=entry,
     )
@@ -77,7 +77,7 @@ def add(
         typer.Option("--dry-run", help="Print the generated log entry without writing a file."),
     ] = False,
 ) -> None:
-    """Append an agent run log entry to logs/codex_runs.md."""
+    """Append an agent run log entry to logs/agent_runs.md."""
 
     target = log_file
     if target.exists() and target.is_dir():

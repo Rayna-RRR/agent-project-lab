@@ -28,7 +28,7 @@ def test_log_add_creates_new_log_file(tmp_path: Path):
 
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(app, ["log", "add"], input=LOG_INPUT)
-        log_file = Path("logs/codex_runs.md")
+        log_file = Path("logs/agent_runs.md")
 
         assert result.exit_code == 0
         assert log_file.exists()
@@ -44,7 +44,7 @@ def test_log_add_appends_second_entry(tmp_path: Path):
     with runner.isolated_filesystem(temp_dir=tmp_path):
         first = runner.invoke(app, ["log", "add"], input=LOG_INPUT)
         second = runner.invoke(app, ["log", "add"], input=LOG_INPUT)
-        content = Path("logs/codex_runs.md").read_text(encoding="utf-8")
+        content = Path("logs/agent_runs.md").read_text(encoding="utf-8")
 
         assert first.exit_code == 0
         assert second.exit_code == 0
@@ -60,7 +60,7 @@ def test_log_add_custom_file_path_works(tmp_path: Path):
 
         assert result.exit_code == 0
         assert Path("notes/runs.md").exists()
-        assert not Path("logs/codex_runs.md").exists()
+        assert not Path("logs/agent_runs.md").exists()
 
 
 def test_log_add_dry_run_does_not_write_file(tmp_path: Path):
@@ -72,7 +72,7 @@ def test_log_add_dry_run_does_not_write_file(tmp_path: Path):
         assert result.exit_code == 0
         assert "Dry run: generated log entry" in result.output
         assert "Implement lab log add" in result.output
-        assert not Path("logs/codex_runs.md").exists()
+        assert not Path("logs/agent_runs.md").exists()
 
 
 def test_log_add_file_option_rejects_directory(tmp_path: Path):
@@ -86,7 +86,7 @@ def test_log_add_file_option_rejects_directory(tmp_path: Path):
         assert result.exit_code == 1
         assert "Expected a Markdown log file, got directory" in result.output
         assert "logs" in result.output
-        assert not Path("logs/codex_runs.md").exists()
+        assert not Path("logs/agent_runs.md").exists()
 
 
 def test_log_add_file_option_rejects_file_parent(tmp_path: Path):
@@ -107,7 +107,7 @@ def test_log_add_entry_includes_timestamp_and_required_sections(tmp_path: Path):
 
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(app, ["log", "add"], input=LOG_INPUT)
-        content = Path("logs/codex_runs.md").read_text(encoding="utf-8")
+        content = Path("logs/agent_runs.md").read_text(encoding="utf-8")
 
         assert result.exit_code == 0
         assert re.search(r"## \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", content)
