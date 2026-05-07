@@ -1,5 +1,7 @@
 # Agent Project Lab
 
+English | [简体中文](README.zh-CN.md)
+
 **Local-first CLI for turning rough project ideas into agent-ready AI coding agent workflows.**
 
 Agent Project Lab helps builders create and maintain the workflow assets that make AI-assisted development more repeatable: `PROJECT_BRIEF.md`, `AGENTS.md`, `TASKS.md`, Agent Skills, and agent run logs.
