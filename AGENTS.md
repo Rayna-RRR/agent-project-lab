@@ -4,6 +4,16 @@
 
 Agent Project Lab helps builders organize project context, project rules, reusable task prompts, Agent Skills, and agent run logs for AI-assisted development. The Python package is still named `agent-project-lab`, but the generated Markdown and JSON assets are platform-agnostic and must not execute or impersonate any AI coding tool.
 
+## Command Output
+
+Protect context usage. **Any command with unknown or potentially large output must be byte-capped.**
+
+Default pattern:
+
+```bash
+COMMAND 2>&1 | head -c 4000
+```
+
 ## Repo Layout
 
 - `agent_project_lab/`: Python package for the CLI, templates, and command handlers.
