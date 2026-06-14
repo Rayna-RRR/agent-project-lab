@@ -97,6 +97,31 @@ TBD
 
 INVALID_NAME_SKILL = STRONG_SKILL.replace("name: review-skill-draft", "name: Review Skill Draft")
 
+FENCED_FAKE_SECTIONS = """---
+name: review-skill-draft
+description: Use when a user asks for a detailed review of a reusable Agent Skill draft.
+---
+
+# Review Skill Draft
+
+```markdown
+## When To Use This Skill
+Useful content.
+## When Not To Use This Skill
+Useful content.
+## Required Inputs
+Useful content.
+## Workflow Steps
+Useful content.
+## Output Format
+Useful content.
+## Quality Bar
+Useful content.
+## Failure Handling
+Useful content.
+```
+"""
+
 
 def test_skill_review_strong_skill_passes(tmp_path: Path):
     runner = CliRunner()
@@ -139,6 +164,20 @@ def test_skill_review_placeholder_sections_fail(tmp_path: Path):
         assert payload["status"] == "FAIL"
         assert "Workflow steps" in payload["missing_items"]
         assert "Failure handling" in payload["missing_items"]
+
+
+def test_skill_review_ignores_sections_inside_fenced_code(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("SKILL.md").write_text(FENCED_FAKE_SECTIONS, encoding="utf-8")
+
+        result = runner.invoke(app, ["skill", "review", "SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "FAIL"
+        assert "Workflow steps" in payload["missing_items"]
 
 
 def test_skill_review_directory_path_works(tmp_path: Path):
@@ -266,6 +305,20 @@ def test_skill_review_json_missing_file_errors(tmp_path: Path):
         assert payload["status"] == "ERROR"
         assert payload["passed"] is False
         assert payload["error"] == "File not found"
+
+
+def test_skill_review_json_non_utf8_file_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("SKILL.md").write_bytes(b"\xff\xfe\x00")
+
+        result = runner.invoke(app, ["skill", "review", "SKILL.md", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "ERROR"
+        assert payload["error"] == "File must be UTF-8 text"
 
 
 def test_skill_review_json_directory_without_skill_md_errors(tmp_path: Path):

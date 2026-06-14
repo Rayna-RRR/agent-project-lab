@@ -109,6 +109,22 @@ def test_init_force_overwrites_generated_files(tmp_path: Path):
         assert Path("TASKS.md").exists()
 
 
+def test_init_force_rejects_output_directory_before_prompting(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("TASKS.md").mkdir()
+
+        result = runner.invoke(app, ["init", "--force"])
+
+        assert result.exit_code == 1
+        assert "Expected generated output paths to be files" in result.output
+        assert "TASKS.md" in result.output
+        assert "Project name" not in result.output
+        assert not Path("PROJECT_BRIEF.md").exists()
+        assert not Path("AGENTS.md").exists()
+
+
 def test_init_from_file_generates_project_files(tmp_path: Path):
     runner = CliRunner()
 

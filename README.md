@@ -1,5 +1,8 @@
 # Agent Project Lab
 
+[![CI](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Rayna-RRR/agent-project-lab)](https://github.com/Rayna-RRR/agent-project-lab/releases/latest)
+
 English | [简体中文](README.zh-CN.md)
 
 **Local-first CLI for turning rough project ideas into agent-ready AI coding agent workflows.**
@@ -53,7 +56,7 @@ Agent Project Lab structures those assets locally so a human or AI coding agent 
 
 ## Feature Overview
 
-| Area | v0.2.0 capability |
+| Area | v0.2.x capability |
 | --- | --- |
 | Project setup | `lab init` and `lab init --from-file JSON` |
 | Agent guidance | `lab agents check` and `lab agents check --json` |
@@ -69,7 +72,8 @@ Agent Project Lab structures those assets locally so a human or AI coding agent 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev]"
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
 ```
 
 Run the CLI:
@@ -77,6 +81,9 @@ Run the CLI:
 ```bash
 lab --help
 ```
+
+Downloadable wheel and source archives are attached to each
+[GitHub Release](https://github.com/Rayna-RRR/agent-project-lab/releases).
 
 ## Quickstart
 
@@ -125,7 +132,7 @@ lab log add --from-file examples/log_entry.json --dry-run
 
 ## Scripted Workflows With JSON
 
-v0.2.0 supports JSON only for `--from-file`. This keeps automation dependency-light and easy to validate with Pydantic.
+v0.2.x supports JSON only for `--from-file`. This keeps automation dependency-light and easy to validate with Pydantic.
 
 Example project input:
 
@@ -210,15 +217,17 @@ agent-project-lab/
     models.py
     commands/
     templates/
+  .github/workflows/
   examples/
   tests/
   AGENTS.md
   CHANGELOG.md
+  RELEASING.md
   README.md
   pyproject.toml
 ```
 
-## v0.2.0 Scope
+## v0.2.x Scope
 
 - Local-first Python CLI using Typer and Rich.
 - Jinja2 Markdown templates.
@@ -260,7 +269,10 @@ The project is portfolio-ready, but it avoids claiming to be a production agent 
 ```bash
 pytest
 ruff check .
+python -m build
 ```
+
+See [RELEASING.md](RELEASING.md) for the release checklist.
 
 ## License
 

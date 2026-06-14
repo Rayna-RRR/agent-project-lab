@@ -11,6 +11,13 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from agent_project_lab.markdown import (
+    HeadingSection,
+    extract_heading_sections,
+    normalize_text,
+    section_has_useful_content,
+    strip_fenced_code_blocks,
+)
 from agent_project_lab.models import (
     InputFileError,
     ReportCheck,
@@ -39,12 +46,6 @@ class ReviewResult:
     requirement: ReviewRequirement
     passed: bool
     evidence: str
-
-
-@dataclass(frozen=True)
-class HeadingSection:
-    heading: str
-    content: str
 
 
 REVIEW_REQUIREMENTS = (
@@ -132,12 +133,6 @@ def render_skill_template(skill: dict[str, object]) -> str:
     return render_markdown_template("skill.md.j2", {"skill": skill})
 
 
-def normalize_text(value: str) -> str:
-    """Normalize prose for practical keyword checks."""
-
-    return " ".join(value.lower().replace("-", " ").replace("_", " ").split())
-
-
 def parse_frontmatter(markdown: str) -> tuple[dict[str, str], str, bool]:
     """Parse simple YAML frontmatter without adding a YAML dependency."""
 
@@ -163,48 +158,6 @@ def parse_frontmatter(markdown: str) -> tuple[dict[str, str], str, bool]:
 
     body = "\n".join(lines[closing_index + 1 :])
     return frontmatter, body, True
-
-
-def extract_heading_sections(markdown: str) -> list[HeadingSection]:
-    """Return normalized Markdown headings with their section content."""
-
-    sections: list[HeadingSection] = []
-    current_heading: Optional[str] = None
-    current_content: list[str] = []
-
-    def append_current_section() -> None:
-        if current_heading is not None:
-            sections.append(HeadingSection(current_heading, "\n".join(current_content).strip()))
-
-    for line in markdown.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("#"):
-            append_current_section()
-            heading = stripped.lstrip("#").strip()
-            current_heading = normalize_text(heading) if heading else None
-            current_content = []
-        elif current_heading is not None:
-            current_content.append(line)
-
-    append_current_section()
-    return sections
-
-
-def section_has_useful_content(content: str) -> bool:
-    """Return whether a Markdown section contains more than placeholder text."""
-
-    normalized = normalize_text(content)
-    placeholders = {
-        "tbd",
-        "todo",
-        "to do",
-        "to be decided",
-        "none",
-        "n/a",
-        "na",
-        "coming soon",
-    }
-    return bool(normalized) and normalized not in placeholders
 
 
 def has_section_or_keyword(
@@ -322,7 +275,7 @@ def review_skill_markdown(markdown: str) -> tuple[list[ReviewResult], int, str]:
     """Review a SKILL.md file using practical local checks."""
 
     frontmatter, body_markdown, has_frontmatter = parse_frontmatter(markdown)
-    body = normalize_text(body_markdown)
+    body = normalize_text(strip_fenced_code_blocks(body_markdown))
     sections = extract_heading_sections(body_markdown)
     name = frontmatter.get("name", "")
     description = frontmatter.get("description", "")
@@ -524,6 +477,9 @@ def new(
         raise typer.Exit(1) from exc
 
     skill_path = Path(".agents") / "skills" / slug / "SKILL.md"
+    if skill_path.is_dir():
+        console.print(f"[red]Expected a SKILL.md file, got directory:[/red] {skill_path}")
+        raise typer.Exit(1)
     if skill_path.exists() and not force:
         console.print(f"[red]Refusing to overwrite existing skill:[/red] {skill_path}")
         console.print("Re-run with --force to overwrite this skill draft.")
@@ -567,7 +523,13 @@ def review(
     """Review a SKILL.md file and report Agent Skill design quality."""
 
     resolved_path = resolve_skill_path(skill_path, json_output=json_output)
-    markdown = resolved_path.read_text(encoding="utf-8")
+    try:
+        markdown = resolved_path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        path_error(resolved_path, "File must be UTF-8 text", json_output)
+    except OSError as exc:
+        path_error(resolved_path, f"Could not read file: {exc}", json_output)
+
     results, score, status = review_skill_markdown(markdown)
     if json_output:
         print_json_model(build_review_report(resolved_path, results, score, status))

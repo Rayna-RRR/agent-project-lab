@@ -1,5 +1,8 @@
 # Agent Project Lab
 
+[![CI](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Rayna-RRR/agent-project-lab)](https://github.com/Rayna-RRR/agent-project-lab/releases/latest)
+
 [English](README.md) | 简体中文
 
 **一个本地优先、平台无关的 AI coding agent 工作流 CLI，用来把模糊项目想法整理成可复用、可检查、可沉淀的工程协作资产。**
@@ -40,7 +43,7 @@ Agent Project Lab 的目标不是“自动写代码”，而是把这些前置�
 
 ## 核心功能表
 
-| 模块 | v0.2.0 功能 |
+| 模块 | v0.2.x 功能 |
 | --- | --- |
 | 项目初始化 | `lab init`、`lab init --from-file JSON` |
 | Agent 规则检查 | `lab agents check`、`lab agents check --json` |
@@ -61,14 +64,15 @@ lab skill review .agents/skills/repo-onboarding --json
 lab log add --from-file examples/log_entry.json
 ```
 
-这条流程会演示 v0.2.0 的核心能力：从 JSON 输入生成项目工作流文件，检查 agent 规则，生成和 review Skill，并记录一次 agent run log。
+这条流程会演示 v0.2.x 的核心能力：从 JSON 输入生成项目工作流文件，检查 agent 规则，生成和 review Skill，并记录一次 agent run log。
 
 ## 安装与本地运行
 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev]"
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
 ```
 
 查看 CLI：
@@ -76,6 +80,9 @@ pip install -e ".[dev]"
 ```bash
 lab --help
 ```
+
+每个 [GitHub Release](https://github.com/Rayna-RRR/agent-project-lab/releases)
+都会附带 wheel 和源码压缩包。
 
 交互式使用：
 
@@ -105,7 +112,7 @@ lab log add
 
 ## JSON 输入与 JSON 输出
 
-v0.2.0 的非交互输入只支持 JSON，不支持 YAML。这是为了保持依赖简单，也方便用 Pydantic 做确定性校验。
+v0.2.x 的非交互输入只支持 JSON，不支持 YAML。这是为了保持依赖简单，也方便用 Pydantic 做确定性校验。
 
 示例项目输入：
 
@@ -170,17 +177,19 @@ agent-project-lab/
     render.py
     commands/
     templates/
+  .github/workflows/
   examples/
   tests/
   AGENTS.md
   CHANGELOG.md
   LICENSE
+  RELEASING.md
   README.md
   README.zh-CN.md
   pyproject.toml
 ```
 
-## v0.2.0 当前范围
+## v0.2.x 当前范围
 
 - Python CLI，基于 Typer 和 Rich。
 - 使用 Jinja2 模板生成 Markdown。
@@ -206,7 +215,7 @@ v0.3 可以考虑：
 - SARIF 或更丰富的报告格式。
 - 对 `AGENTS.md` / `SKILL.md` 的自动修复建议。
 
-这些都属于后续增强，不是 v0.2.0 的范围。
+这些都属于后续增强，不是 v0.2.x 的范围。
 
 ## 作品集与求职价值
 
@@ -225,6 +234,7 @@ v0.3 可以考虑：
 ```bash
 python -m pytest
 ruff check .
+python -m build
 ```
 
 也可以直接检查 CLI：
@@ -233,6 +243,8 @@ ruff check .
 lab --help
 lab agents check AGENTS.md
 ```
+
+发布流程见 [RELEASING.md](RELEASING.md)。
 
 ## License
 

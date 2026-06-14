@@ -6,8 +6,17 @@
   "strengths": [
     "YAML frontmatter",
     "Frontmatter name",
+    "Frontmatter description",
+    "Name format",
+    "Specific description",
     "Description trigger",
-    "Workflow steps"
+    "When to use",
+    "When not to use",
+    "Required inputs",
+    "Workflow steps",
+    "Output format",
+    "Quality bar",
+    "Failure handling"
   ],
   "missing_items": [],
   "suggestions": [],
@@ -19,9 +28,75 @@
       "suggestion": ""
     },
     {
+      "name": "Frontmatter name",
+      "status": "PASS",
+      "evidence": "name: repo-onboarding",
+      "suggestion": ""
+    },
+    {
+      "name": "Frontmatter description",
+      "status": "PASS",
+      "evidence": "Found description",
+      "suggestion": ""
+    },
+    {
+      "name": "Name format",
+      "status": "PASS",
+      "evidence": "name: repo-onboarding",
+      "suggestion": ""
+    },
+    {
+      "name": "Specific description",
+      "status": "PASS",
+      "evidence": "Use when an agent needs to understand a new repository before making code changes.",
+      "suggestion": ""
+    },
+    {
+      "name": "Description trigger",
+      "status": "PASS",
+      "evidence": "Use when an agent needs to understand a new repository before making code changes.",
+      "suggestion": ""
+    },
+    {
+      "name": "When to use",
+      "status": "PASS",
+      "evidence": "Found usage guidance",
+      "suggestion": ""
+    },
+    {
+      "name": "When not to use",
+      "status": "PASS",
+      "evidence": "Found non-usage guidance",
+      "suggestion": ""
+    },
+    {
+      "name": "Required inputs",
+      "status": "PASS",
+      "evidence": "Found required inputs guidance",
+      "suggestion": ""
+    },
+    {
       "name": "Workflow steps",
       "status": "PASS",
       "evidence": "Found workflow guidance",
+      "suggestion": ""
+    },
+    {
+      "name": "Output format",
+      "status": "PASS",
+      "evidence": "Found output guidance",
+      "suggestion": ""
+    },
+    {
+      "name": "Quality bar",
+      "status": "PASS",
+      "evidence": "Found quality guidance",
+      "suggestion": ""
+    },
+    {
+      "name": "Failure handling",
+      "status": "PASS",
+      "evidence": "Found failure guidance",
       "suggestion": ""
     }
   ]

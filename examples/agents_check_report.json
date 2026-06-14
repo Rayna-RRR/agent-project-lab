@@ -11,9 +11,51 @@
       "suggestion": ""
     },
     {
+      "name": "Repo layout",
+      "status": "PASS",
+      "evidence": "Found heading: repo layout",
+      "suggestion": ""
+    },
+    {
       "name": "Setup command",
       "status": "PASS",
       "evidence": "Found heading: setup command",
+      "suggestion": ""
+    },
+    {
+      "name": "Test command",
+      "status": "PASS",
+      "evidence": "Found heading: test command",
+      "suggestion": ""
+    },
+    {
+      "name": "Lint command",
+      "status": "PASS",
+      "evidence": "Found heading: lint command",
+      "suggestion": ""
+    },
+    {
+      "name": "Run command",
+      "status": "PASS",
+      "evidence": "Found heading: run command",
+      "suggestion": ""
+    },
+    {
+      "name": "Done criteria",
+      "status": "PASS",
+      "evidence": "Found heading: done criteria",
+      "suggestion": ""
+    },
+    {
+      "name": "Do-not-build or do-not-change rules",
+      "status": "PASS",
+      "evidence": "Found heading: do not rules",
+      "suggestion": ""
+    },
+    {
+      "name": "AGENTS.md update rules",
+      "status": "PASS",
+      "evidence": "Found heading: update rules",
       "suggestion": ""
     }
   ],

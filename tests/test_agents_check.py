@@ -103,6 +103,30 @@ TBD
 TBD
 """
 
+FENCED_FAKE_HEADINGS = """# Notes
+
+```markdown
+## Project Purpose
+Useful content.
+## Repo Layout
+Useful content.
+## Setup Command
+Useful content.
+## Test Command
+Useful content.
+## Lint Command
+Useful content.
+## Run Command
+Useful content.
+## Done Criteria
+Useful content.
+## Do-Not-Build Rules
+Useful content.
+## Update Rules
+Useful content.
+```
+"""
+
 
 def test_agents_check_complete_file_passes(tmp_path: Path):
     runner = CliRunner()
@@ -146,6 +170,20 @@ def test_agents_check_placeholder_sections_fail(tmp_path: Path):
         assert payload["checks"][0]["evidence"].startswith(
             "Found heading with empty or placeholder content"
         )
+
+
+def test_agents_check_ignores_headings_inside_fenced_code(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("AGENTS.md").write_text(FENCED_FAKE_HEADINGS, encoding="utf-8")
+
+        result = runner.invoke(app, ["agents", "check", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "FAIL"
+        assert payload["score"] < 80
 
 
 def test_agents_check_missing_file_errors(tmp_path: Path):
@@ -230,6 +268,20 @@ def test_agents_check_json_missing_file_errors(tmp_path: Path):
         assert payload["status"] == "ERROR"
         assert payload["passed"] is False
         assert payload["error"] == "File not found"
+
+
+def test_agents_check_json_non_utf8_file_errors(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        Path("AGENTS.md").write_bytes(b"\xff\xfe\x00")
+
+        result = runner.invoke(app, ["agents", "check", "--json"])
+        payload = json.loads(result.output)
+
+        assert result.exit_code == 1
+        assert payload["status"] == "ERROR"
+        assert payload["error"] == "File must be UTF-8 text"
 
 
 def test_agents_check_json_custom_file_path_works(tmp_path: Path):
