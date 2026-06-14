@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Ubuntu / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest
+
+      - name: Smoke-test CLI
+        run: lab --help
+
+  macos-smoke:
+    name: macOS / Python 3.9 Demo Flow
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run complete demo flow
+        run: |
+          demo_dir="$(mktemp -d)"
+          cd "$demo_dir"
+          lab init --from-file "$GITHUB_WORKSPACE/examples/init_input.json"
+          lab agents check AGENTS.md --json
+          lab skill new --from-file "$GITHUB_WORKSPACE/examples/skill_input.json"
+          lab skill review .agents/skills/repo-onboarding --json
+          lab log add --from-file "$GITHUB_WORKSPACE/examples/log_entry.json"
+
+  package:
+    name: Build and install distributions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Build wheel and source distribution
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
+      - name: Install and smoke-test wheel
+        run: |
+          python -m venv /tmp/agent-project-lab-wheel
+          /tmp/agent-project-lab-wheel/bin/python -m pip install dist/*.whl
+          /tmp/agent-project-lab-wheel/bin/lab --help
+
+      - name: Install and smoke-test source distribution
+        run: |
+          python -m venv /tmp/agent-project-lab-sdist
+          /tmp/agent-project-lab-sdist/bin/python -m pip install dist/*.tar.gz
+          /tmp/agent-project-lab-sdist/bin/lab --help
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/*

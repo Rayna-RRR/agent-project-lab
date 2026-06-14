@@ -73,12 +73,6 @@ def load_project_from_file(path: Path) -> dict[str, object]:
         raise typer.Exit(1) from exc
 
 
-def render_template(template_name: str, context: dict[str, object]) -> str:
-    """Render one packaged Markdown template."""
-
-    return render_markdown_template(template_name, context)
-
-
 def init_project(
     force: Annotated[
         bool,
@@ -98,6 +92,13 @@ def init_project(
 
     target_dir = Path.cwd()
     output_paths = {filename: target_dir / filename for filename in GENERATED_FILES}
+    directory_paths = [path for path in output_paths.values() if path.is_dir()]
+    if directory_paths:
+        console.print("[red]Expected generated output paths to be files, got directories:[/red]")
+        for path in directory_paths:
+            console.print(f"- {path.name}")
+        raise typer.Exit(1)
+
     existing_files = [path for path in output_paths.values() if path.exists()]
 
     if existing_files and not force:
@@ -112,7 +113,8 @@ def init_project(
     generated: list[Path] = []
     for filename, template_name in GENERATED_FILES.items():
         path = output_paths[filename]
-        path.write_text(render_template(template_name, {"project": project}), encoding="utf-8")
+        rendered = render_markdown_template(template_name, {"project": project})
+        path.write_text(rendered, encoding="utf-8")
         generated.append(path)
 
     console.print("[green]Generated project workflow files:[/green]")

@@ -135,6 +135,26 @@ def test_skill_new_from_file_generates_skill_file(tmp_path: Path):
         assert "Use when an agent needs to understand" in content
 
 
+def test_skill_new_quotes_frontmatter_description(tmp_path: Path):
+    runner = CliRunner()
+    skill_json = dict(SKILL_JSON)
+    skill_json["description"] = (
+        "Use when an agent needs repository context: inspect setup, tests, and constraints."
+    )
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        write_skill_json(Path("skill.json"), skill_json)
+
+        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+        content = Path(".agents/skills/repo-onboarding/SKILL.md").read_text(encoding="utf-8")
+
+        assert result.exit_code == 0
+        assert (
+            'description: "Use when an agent needs repository context: inspect setup, tests, '
+            'and constraints."' in content
+        )
+
+
 def test_skill_new_from_file_normalizes_skill_name(tmp_path: Path):
     runner = CliRunner()
     skill_json = dict(SKILL_JSON)
@@ -193,3 +213,20 @@ def test_skill_new_from_file_empty_skill_name_errors(tmp_path: Path):
         assert result.exit_code == 1
         assert "Invalid input file data" in result.output
         assert "skill_name" in result.output
+
+
+def test_skill_new_force_rejects_skill_file_directory(tmp_path: Path):
+    runner = CliRunner()
+
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        write_skill_json(Path("skill.json"), SKILL_JSON)
+        skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
+        skill_path.mkdir(parents=True)
+
+        result = runner.invoke(
+            app,
+            ["skill", "new", "--from-file", "skill.json", "--force"],
+        )
+
+        assert result.exit_code == 1
+        assert "Expected a SKILL.md file, got directory" in result.output

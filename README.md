@@ -1,5 +1,8 @@
 # Agent Project Lab
 
+[![CI](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Rayna-RRR/agent-project-lab)](https://github.com/Rayna-RRR/agent-project-lab/releases/latest)
+
 English | [简体中文](README.zh-CN.md)
 
 **Local-first CLI for turning rough project ideas into agent-ready AI coding agent workflows.**
@@ -53,7 +56,7 @@ Agent Project Lab structures those assets locally so a human or AI coding agent 
 
 ## Feature Overview
 
-| Area | v0.2.0 capability |
+| Area | v0.2.x capability |
 | --- | --- |
 | Project setup | `lab init` and `lab init --from-file JSON` |
 | Agent guidance | `lab agents check` and `lab agents check --json` |
@@ -69,7 +72,8 @@ Agent Project Lab structures those assets locally so a human or AI coding agent 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev]"
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
 ```
 
 Run the CLI:
@@ -77,6 +81,9 @@ Run the CLI:
 ```bash
 lab --help
 ```
+
+Downloadable wheel and source archives are attached to each
+[GitHub Release](https://github.com/Rayna-RRR/agent-project-lab/releases).
 
 ## Quickstart
 
@@ -125,7 +132,7 @@ lab log add --from-file examples/log_entry.json --dry-run
 
 ## Scripted Workflows With JSON
 
-v0.2.0 supports JSON only for `--from-file`. This keeps automation dependency-light and easy to validate with Pydantic.
+v0.2.x supports JSON only for `--from-file`. This keeps automation dependency-light and easy to validate with Pydantic.
 
 Example project input:
 
@@ -210,15 +217,17 @@ agent-project-lab/
     models.py
     commands/
     templates/
+  .github/workflows/
   examples/
   tests/
   AGENTS.md
   CHANGELOG.md
+  RELEASING.md
   README.md
   pyproject.toml
 ```
 
-## v0.2.0 Scope
+## v0.2.x Scope
 
 - Local-first Python CLI using Typer and Rich.
 - Jinja2 Markdown templates.
@@ -243,24 +252,32 @@ Potential next steps:
 - SARIF or richer report formats.
 - Automatic repair suggestions for `AGENTS.md` or `SKILL.md`.
 
-## Portfolio And Learning Value
+## Project Strengths
 
-Agent Project Lab is intentionally small, local, and inspectable. It demonstrates:
+Agent Project Lab is intentionally small, local, and inspectable. Its main advantages are:
 
-- CLI product design with a clear v0.1 to v0.2 evolution,
-- practical use of Typer, Rich, Pydantic, Jinja2, pytest, and Ruff,
-- deterministic quality checks without external AI calls,
-- platform-agnostic workflow design for AI-assisted development,
-- testable automation features that preserve interactive UX.
-
-The project is portfolio-ready, but it avoids claiming to be a production agent platform.
+- **Local-first by default:** project context, inputs, generated files, and run logs stay on the
+  user's machine.
+- **Deterministic checks:** `AGENTS.md` and `SKILL.md` reviews produce repeatable results without
+  external AI calls.
+- **Interactive and scriptable:** the same workflows support guided prompts, JSON input, and
+  machine-readable reports.
+- **Platform-agnostic outputs:** generated Markdown and JSON can be used with different editors,
+  automation tools, and AI coding agents.
+- **Clear operating boundaries:** the CLI organizes workflow assets without executing coding
+  tasks, adding hidden network calls, or introducing hosted infrastructure.
+- **Easy to inspect and maintain:** the implementation uses focused Python modules, packaged
+  Jinja2 templates, Pydantic validation, pytest coverage, and Ruff checks.
 
 ## Development
 
 ```bash
 pytest
 ruff check .
+python -m build
 ```
+
+See [RELEASING.md](RELEASING.md) for the release checklist.
 
 ## License
 

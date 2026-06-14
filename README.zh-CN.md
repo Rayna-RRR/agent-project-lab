@@ -1,5 +1,8 @@
 # Agent Project Lab
 
+[![CI](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Rayna-RRR/agent-project-lab)](https://github.com/Rayna-RRR/agent-project-lab/releases/latest)
+
 [English](README.md) | 简体中文
 
 **一个本地优先、平台无关的 AI coding agent 工作流 CLI，用来把模糊项目想法整理成可复用、可检查、可沉淀的工程协作资产。**
@@ -40,7 +43,7 @@ Agent Project Lab 的目标不是“自动写代码”，而是把这些前置�
 
 ## 核心功能表
 
-| 模块 | v0.2.0 功能 |
+| 模块 | v0.2.x 功能 |
 | --- | --- |
 | 项目初始化 | `lab init`、`lab init --from-file JSON` |
 | Agent 规则检查 | `lab agents check`、`lab agents check --json` |
@@ -61,14 +64,15 @@ lab skill review .agents/skills/repo-onboarding --json
 lab log add --from-file examples/log_entry.json
 ```
 
-这条流程会演示 v0.2.0 的核心能力：从 JSON 输入生成项目工作流文件，检查 agent 规则，生成和 review Skill，并记录一次 agent run log。
+这条流程会演示 v0.2.x 的核心能力：从 JSON 输入生成项目工作流文件，检查 agent 规则，生成和 review Skill，并记录一次 agent run log。
 
 ## 安装与本地运行
 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev]"
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
 ```
 
 查看 CLI：
@@ -76,6 +80,9 @@ pip install -e ".[dev]"
 ```bash
 lab --help
 ```
+
+每个 [GitHub Release](https://github.com/Rayna-RRR/agent-project-lab/releases)
+都会附带 wheel 和源码压缩包。
 
 交互式使用：
 
@@ -105,7 +112,7 @@ lab log add
 
 ## JSON 输入与 JSON 输出
 
-v0.2.0 的非交互输入只支持 JSON，不支持 YAML。这是为了保持依赖简单，也方便用 Pydantic 做确定性校验。
+v0.2.x 的非交互输入只支持 JSON，不支持 YAML。这是为了保持依赖简单，也方便用 Pydantic 做确定性校验。
 
 示例项目输入：
 
@@ -170,17 +177,19 @@ agent-project-lab/
     render.py
     commands/
     templates/
+  .github/workflows/
   examples/
   tests/
   AGENTS.md
   CHANGELOG.md
   LICENSE
+  RELEASING.md
   README.md
   README.zh-CN.md
   pyproject.toml
 ```
 
-## v0.2.0 当前范围
+## v0.2.x 当前范围
 
 - Python CLI，基于 Typer 和 Rich。
 - 使用 Jinja2 模板生成 Markdown。
@@ -206,25 +215,27 @@ v0.3 可以考虑：
 - SARIF 或更丰富的报告格式。
 - 对 `AGENTS.md` / `SKILL.md` 的自动修复建议。
 
-这些都属于后续增强，不是 v0.2.0 的范围。
+这些都属于后续增强，不是 v0.2.x 的范围。
 
-## 作品集与求职价值
+## 项目优势
 
-这个项目适合作为国内实习投递和作品集展示项目，重点不在“做了一个很大的 agent 平台”，而在于展示：
+Agent Project Lab 保持小型、本地化和易检查，主要优势包括：
 
-- 能把 AI 协作开发流程拆成清晰、可复用的工程资产。
-- 能用 CLI 解决真实开发流程里的上下文管理问题。
-- 能用 Pydantic / pytest / Ruff 把输入校验、行为测试和质量检查做扎实。
-- 能从 v0.1 到 v0.2 逐步迭代功能，而不是一次性堆功能。
-- 能明确产品边界：local-first、不调用外部 API、不替代 AI coding agent。
-
-对 HR 来说，它展示的是完整度和表达能力；对业务面试官来说，它展示的是对开发协作流程的理解；对技术面试官来说，它展示的是 CLI 设计、结构化校验、模板渲染、测试和工程边界意识。
+- **本地优先：** 项目上下文、输入、生成文件和运行日志都保留在用户本机。
+- **确定性检查：** `AGENTS.md` 和 `SKILL.md` 的检查结果可重复，不依赖外部 AI 调用。
+- **兼顾交互与自动化：** 同一套工作流同时支持交互式提问、JSON 输入和机器可读报告。
+- **平台无关：** 生成的 Markdown 和 JSON 可以配合不同编辑器、自动化工具和 AI coding
+  agent 使用。
+- **边界清晰：** CLI 只整理工作流资产，不执行编码任务，不添加隐藏网络请求，也不引入托管基础设施。
+- **易于检查和维护：** 采用职责集中的 Python 模块、打包的 Jinja2 模板、Pydantic 校验、
+  pytest 测试和 Ruff 检查。
 
 ## 开发与验证命令
 
 ```bash
 python -m pytest
 ruff check .
+python -m build
 ```
 
 也可以直接检查 CLI：
@@ -233,6 +244,8 @@ ruff check .
 lab --help
 lab agents check AGENTS.md
 ```
+
+发布流程见 [RELEASING.md](RELEASING.md)。
 
 ## License
 
