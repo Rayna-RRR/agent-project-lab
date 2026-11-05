@@ -2,6 +2,10 @@
 
 ## v0.2.2
 
+- Used pytest working-directory isolation so CLI tests also run with Typer 0.27+.
+- Kept generated rules and tasks concise with linked project context and shared verification.
+- Included Skill triggers in discovery metadata when the description lacks one.
+- Clarified that checker scores measure heuristic coverage, and recorded CI dependency versions.
 - Consolidated duplicated Markdown heading and placeholder checks.
 - Ignored fenced-code headings when reviewing `AGENTS.md` and `SKILL.md`.
 - Added clear errors for non-UTF-8 review inputs and directory output collisions.

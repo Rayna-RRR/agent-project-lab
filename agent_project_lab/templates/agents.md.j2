@@ -4,29 +4,10 @@
 
 {{ project.idea }}
 
-## Target Users
-
-{{ project.target_users }}
-
-## Main Problem Solved
-
-{{ project.main_problem }}
-
-## MVP Scope
-
-{% for item in project.mvp_scope -%}
-- {{ item }}
-{% endfor %}
-
-## Tech Stack
-
-{% for item in project.tech_stack -%}
-- {{ item }}
-{% endfor %}
-
 ## Repo Layout
 
-- Document source, command, template, test, and example directories here as the project structure is created.
+- [PROJECT_BRIEF.md](PROJECT_BRIEF.md): users, problem, scope, and technology choices.
+- [TASKS.md](TASKS.md): task objectives, verification, and handoff instructions.
 
 ## Setup Command
 
@@ -66,4 +47,4 @@
 
 ## Update Rules
 
-- Update this file when setup, test, lint, run, project rules, or repository layout change.
+- Keep commands and repository paths current here; keep product context in PROJECT_BRIEF.md.

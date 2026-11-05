@@ -41,6 +41,11 @@ jobs:
       - name: Lint
         run: ruff check .
 
+      - name: Record test environment
+        run: |
+          python --version
+          python -m pip list --format=freeze
+
       - name: Test
         run: pytest
 

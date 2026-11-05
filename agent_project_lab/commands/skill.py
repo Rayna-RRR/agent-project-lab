@@ -128,9 +128,12 @@ def normalize_skill_name(name: str) -> str:
 
 
 def render_skill_template(skill: dict[str, object]) -> str:
-    """Render the packaged skill template."""
+    """Keep the trigger in metadata, which agents read before the skill body."""
 
-    return render_markdown_template("skill.md.j2", {"skill": skill})
+    context = dict(skill)
+    if not description_has_trigger(str(skill["description"])):
+        context["description"] = f"{skill['description']} {skill['when_to_use']}"
+    return render_markdown_template("skill.md.j2", {"skill": context})
 
 
 def parse_frontmatter(markdown: str) -> tuple[dict[str, str], str, bool]:
@@ -356,11 +359,11 @@ def render_review_report(path: Path, results: list[ReviewResult], score: int, st
     console.print(
         Panel(
             f"[bold {color}]{status}[/bold {color}]\nScore: [bold]{score}/100[/bold]\nFile: {path}",
-            title="Skill Quality Report",
+            title="Skill Guidance Review",
         )
     )
 
-    table = Table(title="Agent Skill Design Checks")
+    table = Table(title="Guidance Coverage (heuristic)")
     table.add_column("Item", style="bold")
     table.add_column("Status")
     table.add_column("Evidence")

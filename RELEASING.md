@@ -37,7 +37,10 @@ not part of the v0.2 release process.
    /tmp/agent-project-lab-sdist/bin/lab --help
    ```
 
-6. Open a pull request and merge only after every CI job passes.
+6. In the pull request, record the tested commit, Python and dependency versions, test results,
+   and packaging checks. CI records the resolved test environment before running pytest.
+   All six jobs must pass on the same head: Ubuntu Python 3.9–3.12, the macOS demo flow,
+   and distribution installation. A passing local environment alone is not the release baseline.
 
 ## Release
 

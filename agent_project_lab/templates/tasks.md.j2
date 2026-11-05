@@ -1,24 +1,30 @@
 # {{ project.name }} Tasks
 
-Use these starter tasks to turn the project brief into agent-ready work.
+Read [PROJECT_BRIEF.md](PROJECT_BRIEF.md) for product context and [AGENTS.md](AGENTS.md) for repository rules.
 
-{% for item in project.mvp_scope %}
-## Task {{ loop.index }}: {{ item }}
+## Working Method
 
-### Context
+For each task, define one observable acceptance check, implement the outcome, and run the relevant verification below.
 
-Project: {{ project.name }}
+## Verification
 
-Idea: {{ project.idea }}
+- Test: `{{ project.test_command }}`
+- Lint: `{{ project.lint_command }}`
+- Smoke test: `{{ project.run_command }}`
 
-### Prompt
-
-Work on `{{ item }}` using the project context in `PROJECT_BRIEF.md` and rules in `AGENTS.md`.
-
-### Acceptance Criteria
+## Project Acceptance Criteria
 
 {% for criterion in project.done_criteria -%}
 - {{ criterion }}
 {% endfor %}
+
+## Handoff
+
+Report the changed behavior and files, verification commands with actual results, and the next unfinished task.
+
+{% for item in project.mvp_scope %}
+## Task {{ loop.index }}: {{ item }}
+
+Implement `{{ item }}`. Demonstrate the result with a task-specific check and use the shared verification and acceptance criteria above.
 
 {% endfor %}

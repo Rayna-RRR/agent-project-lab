@@ -49,7 +49,7 @@
     {
       "name": "Do-not-build or do-not-change rules",
       "status": "PASS",
-      "evidence": "Found heading: do not rules",
+      "evidence": "Found heading: do not build items",
       "suggestion": ""
     },
     {

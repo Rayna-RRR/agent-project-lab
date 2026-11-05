@@ -169,7 +169,7 @@ def render_report(path: Path, results: list[CheckResult], score: int) -> None:
         )
     )
 
-    table = Table(title="Required Agent Guidance")
+    table = Table(title="Guidance Coverage (heuristic)")
     table.add_column("Item", style="bold")
     table.add_column("Status")
     table.add_column("Evidence")

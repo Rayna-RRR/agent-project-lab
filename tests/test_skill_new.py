@@ -4,6 +4,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from agent_project_lab.cli import app
+from agent_project_lab.commands.skill import parse_frontmatter
 
 SKILL_INPUT = "\n".join(
     [
@@ -40,99 +41,110 @@ def write_skill_json(path: Path, data: dict[str, object]) -> None:
 def test_skill_new_generates_skill_file(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(app, ["skill", "new"], input=SKILL_INPUT)
-        skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
+    result = runner.invoke(app, ["skill", "new"], input=SKILL_INPUT)
+    skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
 
-        assert result.exit_code == 0
-        assert skill_path.exists()
-        content = skill_path.read_text(encoding="utf-8")
-        assert "name: review-skill-draft" in content
-        assert "Review Agent Skill drafts" in content
-        assert "Generated Agent Skill draft" in result.output
-        assert "description controls when an agent may use this skill" in result.output
+    assert result.exit_code == 0
+    assert skill_path.exists()
+    content = skill_path.read_text(encoding="utf-8")
+    assert "name: review-skill-draft" in content
+    assert "Review Agent Skill drafts" in content
+    assert "Generated Agent Skill draft" in result.output
+    assert "description controls when an agent may use this skill" in result.output
 
 
 def test_skill_new_normalizes_skill_name(tmp_path: Path):
     runner = CliRunner()
     skill_input = SKILL_INPUT.replace("Review Skill Draft", "  Review   Skill Draft!!  ", 1)
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(app, ["skill", "new"], input=skill_input)
+    result = runner.invoke(app, ["skill", "new"], input=skill_input)
 
-        assert result.exit_code == 0
-        assert Path(".agents/skills/review-skill-draft/SKILL.md").exists()
+    assert result.exit_code == 0
+    assert Path(".agents/skills/review-skill-draft/SKILL.md").exists()
+
+
+def test_skill_new_puts_trigger_in_discovery_metadata(tmp_path: Path):
+    runner = CliRunner()
+    skill_json = dict(SKILL_JSON)
+    skill_json["description"] = "Summarize repository commands and architecture."
+    skill_json["when_to_use"] = "Use when onboarding to an unfamiliar repository."
+
+    write_skill_json(Path("skill.json"), skill_json)
+
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+    content = Path(".agents/skills/repo-onboarding/SKILL.md").read_text(encoding="utf-8")
+    metadata, body, _ = parse_frontmatter(content)
+
+    assert result.exit_code == 0
+    assert skill_json["description"] in metadata["description"]
+    assert skill_json["when_to_use"] in metadata["description"]
+    assert "## Description" not in body
 
 
 def test_skill_new_does_not_overwrite_without_force(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
-        skill_path.parent.mkdir(parents=True)
-        skill_path.write_text("existing skill", encoding="utf-8")
+    skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
+    skill_path.parent.mkdir(parents=True)
+    skill_path.write_text("existing skill", encoding="utf-8")
 
-        result = runner.invoke(app, ["skill", "new"], input=SKILL_INPUT)
+    result = runner.invoke(app, ["skill", "new"], input=SKILL_INPUT)
 
-        assert result.exit_code == 1
-        assert "Refusing to overwrite" in result.output
-        assert skill_path.read_text(encoding="utf-8") == "existing skill"
+    assert result.exit_code == 1
+    assert "Refusing to overwrite" in result.output
+    assert skill_path.read_text(encoding="utf-8") == "existing skill"
 
 
 def test_skill_new_refuses_existing_skill_before_prompting_for_details(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
-        skill_path.parent.mkdir(parents=True)
-        skill_path.write_text("existing skill", encoding="utf-8")
+    skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
+    skill_path.parent.mkdir(parents=True)
+    skill_path.write_text("existing skill", encoding="utf-8")
 
-        result = runner.invoke(app, ["skill", "new"], input="Review Skill Draft\n")
+    result = runner.invoke(app, ["skill", "new"], input="Review Skill Draft\n")
 
-        assert result.exit_code == 1
-        assert "Refusing to overwrite" in result.output
-        assert "One-sentence description" not in result.output
+    assert result.exit_code == 1
+    assert "Refusing to overwrite" in result.output
+    assert "One-sentence description" not in result.output
 
 
 def test_skill_new_force_overwrites_existing_skill(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
-        skill_path.parent.mkdir(parents=True)
-        skill_path.write_text("existing skill", encoding="utf-8")
+    skill_path = Path(".agents/skills/review-skill-draft/SKILL.md")
+    skill_path.parent.mkdir(parents=True)
+    skill_path.write_text("existing skill", encoding="utf-8")
 
-        result = runner.invoke(app, ["skill", "new", "--force"], input=SKILL_INPUT)
+    result = runner.invoke(app, ["skill", "new", "--force"], input=SKILL_INPUT)
 
-        assert result.exit_code == 0
-        assert "existing skill" not in skill_path.read_text(encoding="utf-8")
+    assert result.exit_code == 0
+    assert "existing skill" not in skill_path.read_text(encoding="utf-8")
 
 
 def test_skill_new_empty_skill_name_errors(tmp_path: Path):
     runner = CliRunner()
     skill_input = SKILL_INPUT.replace("Review Skill Draft", "", 1)
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(app, ["skill", "new"], input=skill_input)
+    result = runner.invoke(app, ["skill", "new"], input=skill_input)
 
-        assert result.exit_code == 1
-        assert "Skill name is required" in result.output
+    assert result.exit_code == 1
+    assert "Skill name is required" in result.output
 
 
 def test_skill_new_from_file_generates_skill_file(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), SKILL_JSON)
+    write_skill_json(Path("skill.json"), SKILL_JSON)
 
-        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
-        skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+    skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
 
-        assert result.exit_code == 0
-        assert skill_path.exists()
-        content = skill_path.read_text(encoding="utf-8")
-        assert "name: repo-onboarding" in content
-        assert "Use when an agent needs to understand" in content
+    assert result.exit_code == 0
+    assert skill_path.exists()
+    content = skill_path.read_text(encoding="utf-8")
+    assert "name: repo-onboarding" in content
+    assert "Use when an agent needs to understand" in content
 
 
 def test_skill_new_quotes_frontmatter_description(tmp_path: Path):
@@ -142,17 +154,16 @@ def test_skill_new_quotes_frontmatter_description(tmp_path: Path):
         "Use when an agent needs repository context: inspect setup, tests, and constraints."
     )
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), skill_json)
+    write_skill_json(Path("skill.json"), skill_json)
 
-        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
-        content = Path(".agents/skills/repo-onboarding/SKILL.md").read_text(encoding="utf-8")
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+    content = Path(".agents/skills/repo-onboarding/SKILL.md").read_text(encoding="utf-8")
 
-        assert result.exit_code == 0
-        assert (
-            'description: "Use when an agent needs repository context: inspect setup, tests, '
-            'and constraints."' in content
-        )
+    assert result.exit_code == 0
+    assert (
+        'description: "Use when an agent needs repository context: inspect setup, tests, '
+        'and constraints."' in content
+    )
 
 
 def test_skill_new_from_file_normalizes_skill_name(tmp_path: Path):
@@ -160,44 +171,41 @@ def test_skill_new_from_file_normalizes_skill_name(tmp_path: Path):
     skill_json = dict(SKILL_JSON)
     skill_json["skill_name"] = "  Repo   Onboarding!!  "
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), skill_json)
+    write_skill_json(Path("skill.json"), skill_json)
 
-        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
 
-        assert result.exit_code == 0
-        assert Path(".agents/skills/repo-onboarding/SKILL.md").exists()
+    assert result.exit_code == 0
+    assert Path(".agents/skills/repo-onboarding/SKILL.md").exists()
 
 
 def test_skill_new_from_file_does_not_overwrite_without_force(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), SKILL_JSON)
-        skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
-        skill_path.parent.mkdir(parents=True)
-        skill_path.write_text("existing skill", encoding="utf-8")
+    write_skill_json(Path("skill.json"), SKILL_JSON)
+    skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
+    skill_path.parent.mkdir(parents=True)
+    skill_path.write_text("existing skill", encoding="utf-8")
 
-        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
 
-        assert result.exit_code == 1
-        assert "Refusing to overwrite" in result.output
-        assert skill_path.read_text(encoding="utf-8") == "existing skill"
+    assert result.exit_code == 1
+    assert "Refusing to overwrite" in result.output
+    assert skill_path.read_text(encoding="utf-8") == "existing skill"
 
 
 def test_skill_new_from_file_force_overwrites_existing_skill(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), SKILL_JSON)
-        skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
-        skill_path.parent.mkdir(parents=True)
-        skill_path.write_text("existing skill", encoding="utf-8")
+    write_skill_json(Path("skill.json"), SKILL_JSON)
+    skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
+    skill_path.parent.mkdir(parents=True)
+    skill_path.write_text("existing skill", encoding="utf-8")
 
-        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json", "--force"])
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json", "--force"])
 
-        assert result.exit_code == 0
-        assert "existing skill" not in skill_path.read_text(encoding="utf-8")
+    assert result.exit_code == 0
+    assert "existing skill" not in skill_path.read_text(encoding="utf-8")
 
 
 def test_skill_new_from_file_empty_skill_name_errors(tmp_path: Path):
@@ -205,28 +213,26 @@ def test_skill_new_from_file_empty_skill_name_errors(tmp_path: Path):
     skill_json = dict(SKILL_JSON)
     skill_json["skill_name"] = ""
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), skill_json)
+    write_skill_json(Path("skill.json"), skill_json)
 
-        result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
+    result = runner.invoke(app, ["skill", "new", "--from-file", "skill.json"])
 
-        assert result.exit_code == 1
-        assert "Invalid input file data" in result.output
-        assert "skill_name" in result.output
+    assert result.exit_code == 1
+    assert "Invalid input file data" in result.output
+    assert "skill_name" in result.output
 
 
 def test_skill_new_force_rejects_skill_file_directory(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_skill_json(Path("skill.json"), SKILL_JSON)
-        skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
-        skill_path.mkdir(parents=True)
+    write_skill_json(Path("skill.json"), SKILL_JSON)
+    skill_path = Path(".agents/skills/repo-onboarding/SKILL.md")
+    skill_path.mkdir(parents=True)
 
-        result = runner.invoke(
-            app,
-            ["skill", "new", "--from-file", "skill.json", "--force"],
-        )
+    result = runner.invoke(
+        app,
+        ["skill", "new", "--from-file", "skill.json", "--force"],
+    )
 
-        assert result.exit_code == 1
-        assert "Expected a SKILL.md file, got directory" in result.output
+    assert result.exit_code == 1
+    assert "Expected a SKILL.md file, got directory" in result.output

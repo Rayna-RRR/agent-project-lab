@@ -87,3 +87,10 @@ python -m build
 - When changing release behavior, update `RELEASING.md`, workflow files, and relevant tests or
   smoke checks.
 - Keep `pyproject.toml`, `agent_project_lab.__version__`, `CHANGELOG.md`, and release tags aligned.
+
+## Generated Guidance
+
+- Keep product context in `PROJECT_BRIEF.md`; link to it from rules and tasks.
+- Prefer concrete commands, observable outcomes, and verification evidence over repeated advice.
+- Checker scores measure heuristic guidance coverage; do not describe them as agent evaluations
+  or full format validation.

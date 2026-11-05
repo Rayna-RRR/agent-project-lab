@@ -1,43 +1,38 @@
 ---
-name: readme-review
-description: Use when a user asks to review a README for setup clarity, usage examples, scope boundaries, and contributor readiness.
+name: repo-onboarding
+description: "Use when an agent needs to understand a new repository before making code changes."
 ---
 
-# README Review
-
-## Description
-
-Review README drafts for practical developer onboarding quality.
+# repo onboarding
 
 ## When To Use This Skill
 
-Use this skill when a user provides a README draft and wants clear, actionable documentation feedback.
+When starting work in an unfamiliar repo or after a long break from the project.
 
 ## When Not To Use This Skill
 
-Do not use this skill for general code review, product strategy, or marketing copywriting.
+Do not use for tiny edits where the target file and acceptance criteria are already clear.
 
 ## Required Inputs
 
-- Path to the README file.
-- Intended audience for the project.
-- Current setup, test, lint, and run commands if known.
+- Repository path
+- User goal
+- Known constraints
 
 ## Workflow Steps
 
-1. Read the README from top to bottom.
-2. Check project positioning, install steps, quickstart, command examples, and scope boundaries.
-3. Identify unclear or missing sections.
-4. Produce prioritized fixes with concrete wording suggestions.
+1. Inspect the README, AGENTS.md, pyproject/package config, and tests.
+2. Identify setup, test, lint, and run commands.
+3. Summarize project purpose, layout, risks, and next steps.
 
 ## Output Format
 
-A concise Markdown report with PASS/WARN/FAIL findings and suggested README edits.
+A concise Markdown briefing with commands, architecture notes, risks, and recommended next action.
 
 ## Quality Bar
 
-Feedback should be specific, repo-aware, and focused on helping a developer start using the project quickly.
+The briefing is grounded in files that were actually inspected and avoids unsupported claims.
 
 ## Failure Handling
 
-If the README path is missing or the project goal is unclear, report the blocker and ask for the minimum missing context.
+If key files are missing or commands cannot be inferred, report the blocker and ask for the minimum missing context.
