@@ -3,6 +3,7 @@
 ## v0.2.2
 
 - Used pytest working-directory isolation so CLI tests also run with Typer 0.27+.
+- Kept the Python 3.9–3.12 CI matrix on Ubuntu 24.04, which provides Python 3.9 builds.
 - Kept generated rules and tasks concise with linked project context and shared verification.
 - Included Skill triggers in discovery metadata when the description lacks one.
 - Clarified that checker scores measure heuristic coverage, and recorded CI dependency versions.

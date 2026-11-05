@@ -41,6 +41,7 @@ not part of the v0.2 release process.
    and packaging checks. CI records the resolved test environment before running pytest.
    All six jobs must pass on the same head: Ubuntu Python 3.9–3.12, the macOS demo flow,
    and distribution installation. A passing local environment alone is not the release baseline.
+   The test matrix uses Ubuntu 24.04 because `setup-python` has no Python 3.9 build for 26.04.
 
 ## Release
 
