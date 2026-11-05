@@ -1,41 +1,41 @@
 # Sample Project Idea
 
-Project name: README Coach
+Project name: Readme Steward
 
-One-sentence idea: A local-first CLI that helps solo developers turn rough README notes into clearer project documentation.
+One-sentence idea: A local CLI that helps maintain clear README files for small software projects.
 
-Target users: Solo developers and small open-source maintainers.
+Target users: Solo developers and small teams using AI coding agents.
 
-Main problem solved: Project docs often lack setup commands, usage examples, and clear scope, which slows down contributors and future AI coding sessions.
+Main problem solved: README updates are often skipped because project context and verification steps are scattered.
 
 MVP scope:
 
-- Ask structured README improvement questions.
-- Generate a README improvement checklist.
-- Produce a concise rewrite plan.
+- Generate a README improvement brief.
+- Create agent-ready repository rules.
+- Draft reusable README cleanup tasks.
 
 Tech stack:
 
 - Python
 - Typer
 - Rich
-- pytest
+- Jinja2
 
 Commands:
 
 - Setup: `pip install -e ".[dev]"`
 - Test: `pytest`
 - Lint: `ruff check .`
-- Run: `readme-coach --help`
+- Run: `lab --help`
 
 Do-not-build items:
 
-- No web UI in v0.1.
-- No external AI API calls.
-- No database.
+- Web UI.
+- Database.
+- External API calls.
 
 Done criteria:
 
-- CLI help works.
 - Generated Markdown is readable.
-- Tests pass.
+- Commands are documented.
+- Tests pass locally.

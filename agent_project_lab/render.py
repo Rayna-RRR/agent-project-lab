@@ -22,4 +22,4 @@ def render_markdown_template(template_name: str, context: dict[str, object]) -> 
     """Render a packaged Markdown template and keep a trailing newline."""
 
     rendered = template_environment().get_template(template_name).render(**context)
-    return rendered if rendered.endswith("\n") else f"{rendered}\n"
+    return rendered.rstrip("\n") + "\n"

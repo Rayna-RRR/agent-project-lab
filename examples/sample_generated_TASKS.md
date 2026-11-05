@@ -1,57 +1,35 @@
-# README Coach Tasks
+# Readme Steward Tasks
 
-Use these starter tasks to turn the project brief into agent-ready work.
+Read [PROJECT_BRIEF.md](PROJECT_BRIEF.md) for product context and [AGENTS.md](AGENTS.md) for repository rules.
 
-## Task 1: Ask structured README improvement questions.
+## Working Method
 
-### Context
+For each task, define one observable acceptance check, implement the outcome, and run the relevant verification below.
 
-Project: README Coach
+## Verification
 
-Idea: A local-first CLI that helps solo developers turn rough README notes into clearer project documentation.
+- Test: `pytest`
+- Lint: `ruff check .`
+- Smoke test: `lab --help`
 
-### Prompt
+## Project Acceptance Criteria
 
-Work on `Ask structured README improvement questions.` using the project context in `PROJECT_BRIEF.md` and rules in `AGENTS.md`.
+- Generated Markdown is readable
+- Commands are documented
+- Tests pass locally
 
-### Acceptance Criteria
+## Handoff
 
-- CLI help works.
-- Generated Markdown is readable.
-- Tests pass.
+Report the changed behavior and files, verification commands with actual results, and the next unfinished task.
 
-## Task 2: Generate a README improvement checklist.
+## Task 1: Generate a README improvement brief
 
-### Context
+Implement `Generate a README improvement brief`. Demonstrate the result with a task-specific check and use the shared verification and acceptance criteria above.
 
-Project: README Coach
+## Task 2: Create agent-ready repository rules
 
-Idea: A local-first CLI that helps solo developers turn rough README notes into clearer project documentation.
+Implement `Create agent-ready repository rules`. Demonstrate the result with a task-specific check and use the shared verification and acceptance criteria above.
 
-### Prompt
+## Task 3: Draft reusable README cleanup tasks
 
-Work on `Generate a README improvement checklist.` using the project context in `PROJECT_BRIEF.md` and rules in `AGENTS.md`.
-
-### Acceptance Criteria
-
-- CLI help works.
-- Generated Markdown is readable.
-- Tests pass.
-
-## Task 3: Produce a concise rewrite plan.
-
-### Context
-
-Project: README Coach
-
-Idea: A local-first CLI that helps solo developers turn rough README notes into clearer project documentation.
-
-### Prompt
-
-Work on `Produce a concise rewrite plan.` using the project context in `PROJECT_BRIEF.md` and rules in `AGENTS.md`.
-
-### Acceptance Criteria
-
-- CLI help works.
-- Generated Markdown is readable.
-- Tests pass.
+Implement `Draft reusable README cleanup tasks`. Demonstrate the result with a task-specific check and use the shared verification and acceptance criteria above.

@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.2.2
+
+- Used pytest working-directory isolation so CLI tests also run with Typer 0.27+.
+- Kept the Python 3.9–3.12 CI matrix on Ubuntu 24.04, which provides Python 3.9 builds.
+- Kept generated rules and tasks concise with linked project context and shared verification.
+- Included Skill triggers in discovery metadata when the description lacks one.
+- Clarified that checker scores measure heuristic coverage, and recorded CI dependency versions.
+- Consolidated duplicated Markdown heading and placeholder checks.
+- Ignored fenced-code headings when reviewing `AGENTS.md` and `SKILL.md`.
+- Added clear errors for non-UTF-8 review inputs and directory output collisions.
+- Quoted generated Skill descriptions so frontmatter remains valid with YAML-sensitive text.
+- Synchronized package version metadata, setup instructions, and full JSON report examples.
+- Added cross-version CI, macOS workflow smoke tests, package installation checks, and
+  tag-driven GitHub Releases.
+
+This is a compatibility and release-hardening update. It does not add new product features or
+change the local-first scope.
+
 ## v0.2.0
 
 - Added local JSON `--from-file` input for `lab init`, `lab skill new`, and `lab log add`.

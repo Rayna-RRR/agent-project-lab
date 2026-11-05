@@ -2,34 +2,12 @@
 
 ## Project Purpose
 
-A local-first CLI that helps solo developers turn rough README notes into clearer project documentation.
-
-## Target Users
-
-Solo developers and small open-source maintainers.
-
-## Main Problem Solved
-
-Project docs often lack setup commands, usage examples, and clear scope, which slows down contributors and future AI coding sessions.
-
-## MVP Scope
-
-- Ask structured README improvement questions.
-- Generate a README improvement checklist.
-- Produce a concise rewrite plan.
-
-## Tech Stack
-
-- Python
-- Typer
-- Rich
-- pytest
+A local CLI that helps maintain clear README files for small software projects.
 
 ## Repo Layout
 
-- `readme_coach/`: CLI package and command handlers.
-- `readme_coach/templates/`: Markdown templates.
-- `tests/`: pytest coverage for CLI behavior.
+- [PROJECT_BRIEF.md](PROJECT_BRIEF.md): users, problem, scope, and technology choices.
+- [TASKS.md](TASKS.md): task objectives, verification, and handoff instructions.
 
 ## Setup Command
 
@@ -52,21 +30,21 @@ ruff check .
 ## Run Command
 
 ```bash
-readme-coach --help
+lab --help
 ```
 
 ## Do-Not-Build Items
 
-- No web UI in v0.1.
-- No external AI API calls.
-- No database.
+- Web UI
+- Database
+- External API calls
 
 ## Done Criteria
 
-- CLI help works.
-- Generated Markdown is readable.
-- Tests pass.
+- Generated Markdown is readable
+- Commands are documented
+- Tests pass locally
 
 ## Update Rules
 
-- Update this file when setup, test, lint, run, or project rules change.
+- Keep commands and repository paths current here; keep product context in PROJECT_BRIEF.md.

@@ -1,17 +1,18 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-project-lab"
-version = "0.2.0"
+version = "0.2.2"
 description = "Local-first CLI for turning rough project ideas into reusable AI coding agent workflows."
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
   { name = "Agent Project Lab" }
 ]
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["cli", "agents", "skills", "workflow", "ai-coding"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -33,6 +34,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "build>=1.2.0",
   "pytest>=8.0.0",
   "ruff>=0.6.0",
 ]

@@ -1,8 +1,10 @@
 import json
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
 
+import agent_project_lab
 from agent_project_lab.models import InputFileError, ProjectInitInput, load_json_model
 
 PROJECT_INPUT = {
@@ -59,3 +61,7 @@ def test_load_json_model_reports_non_utf8_input(tmp_path: Path):
 
     with pytest.raises(InputFileError, match="UTF-8"):
         load_json_model(input_path, ProjectInitInput)
+
+
+def test_package_version_matches_distribution_metadata():
+    assert agent_project_lab.__version__ == version("agent-project-lab")

@@ -1,13 +1,9 @@
 ---
 name: {{ skill.slug }}
-description: {{ skill.description }}
+description: {{ skill.description | tojson }}
 ---
 
 # {{ skill.name }}
-
-## Description
-
-{{ skill.description }}
 
 ## When To Use This Skill
 

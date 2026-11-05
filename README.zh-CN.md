@@ -1,239 +1,116 @@
 # Agent Project Lab
 
+[![CI](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Rayna-RRR/agent-project-lab/actions/workflows/ci.yml)
+
 [English](README.md) | 简体中文
 
-**一个本地优先、平台无关的 AI coding agent 工作流 CLI，用来把模糊项目想法整理成可复用、可检查、可沉淀的工程协作资产。**
+**一个本地 CLI，让编码智能体在下一次协作时仍能用上准确的项目上下文。**
 
-Agent Project Lab 不是 AI coding agent，也不替代任何 AI coding agent。它更像一个“项目工作流整理器”：帮助开发者把项目背景、协作规则、任务拆解、Agent Skill 草稿和运行日志落到本地 Markdown / JSON 文件里，让后续的人机协作更清晰、更可复用、更容易验证。
+把项目输入整理成项目简报、仓库规则、任务提示、Skill 和运行日志。
+所有文件都是本地 Markdown 或 JSON；CI 覆盖 Python 3.9–3.12。
 
-## 项目解决的问题
+## 快速开始
 
-AI coding agent 很适合写代码、改 bug、补测试，但很多项目在真正开始协作前，缺少稳定的上下文：
-
-- 项目想法只存在聊天记录里，下一次很难复用。
-- setup、test、lint、run 命令没有集中记录。
-- 仓库规则、不要做什么、完成标准分散在不同地方。
-- 好用的提示词和工作流没有沉淀成 Skill。
-- 每次 agent 协作做了什么、验证了什么、学到了什么，没有日志。
-
-Agent Project Lab 的目标不是“自动写代码”，而是把这些前置和复盘信息结构化，帮助 AI 协作开发流程变得更稳定。
-
-## 这个工具能做什么
-
-- 通过 `lab init` 把项目想法整理成 `PROJECT_BRIEF.md`、`AGENTS.md` 和 `TASKS.md`。
-- 通过 `lab agents check` 检查 `AGENTS.md` 是否包含对 AI coding agent 有用的项目规则。
-- 通过 `lab skill new` 生成 Agent Skill 草稿。
-- 通过 `lab skill review` 检查 `SKILL.md` 的触发条件、边界、输入、流程、输出格式和失败处理。
-- 通过 `lab log add` 记录一次 agent-assisted development 的运行日志。
-- 通过 `--from-file JSON` 支持脚本化、可复现的本地工作流。
-- 通过 `--json` 输出支持机器可读的检查报告。
-
-## 这个工具不做什么
-
-- 不替代任何 AI coding agent。
-- 不执行自动编码任务。
-- 不调用外部 API。
-- 不连接任何 AI coding agent 产品。
-- 不提供 Web UI 或 TUI。
-- 不使用数据库。
-- 不声称自己是生产级 agent 平台。
-
-## 核心功能表
-
-| 模块 | v0.2.0 功能 |
-| --- | --- |
-| 项目初始化 | `lab init`、`lab init --from-file JSON` |
-| Agent 规则检查 | `lab agents check`、`lab agents check --json` |
-| Skill 草稿生成 | `lab skill new`、`lab skill new --from-file JSON` |
-| Skill 质量检查 | `lab skill review`、`lab skill review --json` |
-| 运行日志 | `lab log add`、`lab log add --from-file JSON`、`lab log add --dry-run` |
-| 结构化校验 | Pydantic 校验本地 JSON 输入 |
-| 模板生成 | Jinja2 渲染 Markdown 输出 |
-| 工程验证 | pytest 测试和 Ruff lint |
-
-## Demo Flow / 快速体验
-
-```bash
-lab init --from-file examples/init_input.json
-lab agents check AGENTS.md --json
-lab skill new --from-file examples/skill_input.json
-lab skill review .agents/skills/repo-onboarding --json
-lab log add --from-file examples/log_entry.json
-```
-
-这条流程会演示 v0.2.0 的核心能力：从 JSON 输入生成项目工作流文件，检查 agent 规则，生成和 review Skill，并记录一次 agent run log。
-
-## 安装与本地运行
+在仓库根目录安装：
 
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install -e ".[dev]"
-```
-
-查看 CLI：
-
-```bash
+python -m pip install -e ".[dev]"
 lab --help
 ```
 
-交互式使用：
+在临时目录体验完整流程：
 
 ```bash
-lab init
-lab agents check
-lab skill new
-lab skill review .agents/skills/repo-onboarding
-lab log add
-```
-
-## 命令说明
-
-| 命令 | 作用 | 说明 |
-| --- | --- | --- |
-| `lab init` | 生成项目工作流文件 | 交互式提问并生成 `PROJECT_BRIEF.md`、`AGENTS.md`、`TASKS.md`。 |
-| `lab init --from-file PATH` | 非交互初始化 | 从本地 JSON 文件读取项目字段。 |
-| `lab agents check [PATH]` | 检查 `AGENTS.md` | 默认检查当前目录下的 `AGENTS.md`，输出 Rich 报告。 |
-| `lab agents check [PATH] --json` | 输出 JSON 检查结果 | 适合脚本、CI 或其他自动化读取。 |
-| `lab skill new` | 生成 Agent Skill 草稿 | 生成 `.agents/skills/<skill-name>/SKILL.md`。 |
-| `lab skill new --from-file PATH` | 非交互生成 Skill | 从本地 JSON 文件读取 Skill 字段。 |
-| `lab skill review PATH` | 检查 Skill 质量 | 支持传入 `SKILL.md` 文件或包含 `SKILL.md` 的目录。 |
-| `lab skill review PATH --json` | 输出 JSON review 报告 | 返回分数、状态、优点、缺失项和修改建议。 |
-| `lab log add` | 追加运行日志 | 记录任务目标、提示摘要、改动文件、验证结果和经验沉淀。 |
-| `lab log add --from-file PATH` | 非交互追加日志 | 从本地 JSON 文件读取日志字段。 |
-| `lab log add --dry-run` | 预览日志 | 只打印生成内容，不写入文件。 |
-
-## JSON 输入与 JSON 输出
-
-v0.2.0 的非交互输入只支持 JSON，不支持 YAML。这是为了保持依赖简单，也方便用 Pydantic 做确定性校验。
-
-示例项目输入：
-
-```json
-{
-  "project_name": "Readme Steward",
-  "project_idea": "A local CLI that helps maintain clear README files for small software projects.",
-  "target_users": "Solo developers and small teams using AI coding agents",
-  "main_problem": "README updates are often skipped because project context and verification steps are scattered.",
-  "mvp_scope": ["Generate a README improvement brief", "Create agent-ready repository rules"],
-  "tech_stack": ["Python", "Typer", "Rich"],
-  "setup_command": "pip install -e \".[dev]\"",
-  "test_command": "pytest",
-  "lint_command": "ruff check .",
-  "run_command": "lab --help",
-  "do_not_build": ["Web UI", "Database", "External API calls"],
-  "done_criteria": ["Generated Markdown is readable", "Tests pass locally"]
-}
-```
-
-checker 命令可以输出 JSON：
-
-```bash
+repo_dir="$PWD"
+demo_dir="$(mktemp -d)"
+cd "$demo_dir"
+lab init --from-file "$repo_dir/examples/init_input.json"
 lab agents check AGENTS.md --json
+lab skill new --from-file "$repo_dir/examples/skill_input.json"
 lab skill review .agents/skills/repo-onboarding --json
+lab log add --from-file "$repo_dir/examples/log_entry.json"
 ```
 
-报告会包含：
+省略 `--from-file`，即可交互式运行 `lab init`、`lab skill new`、`lab log add`。
+初始化自己的项目时，在目标项目根目录运行 `lab init`。
 
-- `status`
-- `score`
-- `passed`
-- `checks`
-- `missing_items`
-- `suggestions`
+## 每个文件负责什么
 
-这让它可以被脚本、CI 或其他本地自动化流程读取。
+| 文件 | 用途 |
+| --- | --- |
+| `PROJECT_BRIEF.md` | 用户、问题、范围和技术选择 |
+| `AGENTS.md` | 项目目标、命令、目录、约束和完成标准 |
+| `TASKS.md` | 任务目标、公共验证步骤和交接要求 |
+| `.agents/skills/<name>/SKILL.md` | 可复用流程，包含发现元数据和执行步骤 |
+| `logs/agent_runs.md` | 改动、验证证据、经验和下一步 |
 
-## examples 目录说明
+产品背景集中在简报里，规则与任务引用它，减少重复上下文。
+初始化后，把示例验收标准改成实际项目可验证的结果，并补上真实源码和测试路径。
 
-[examples/](examples/) 目录提供了短小但完整的示例：
+这沿用 [AGENTS.md](https://agents.md/) 的仓库规则定位，以及
+[Agent Skills](https://agentskills.io/specification) 先加载元数据、按需加载正文的方式。
+Skill 的自动发现目录取决于所使用的智能体。
 
-- `sample_project_idea.md`：一个原始项目想法。
-- `sample_generated_PROJECT_BRIEF.md`：生成后的项目 brief。
-- `sample_generated_AGENTS.md`：生成后的 agent 协作规则。
-- `sample_generated_TASKS.md`：生成后的任务提示包。
-- `sample_skill.md`：示例 Agent Skill。
-- `sample_agent_runs.md`：示例运行日志。
-- `init_input.json`：`lab init --from-file` 示例输入。
-- `skill_input.json`：`lab skill new --from-file` 示例输入。
-- `log_entry.json`：`lab log add --from-file` 示例输入。
-- `agents_check_report.json`：`lab agents check --json` 示例输出。
-- `skill_review_report.json`：`lab skill review --json` 示例输出。
+## 命令
 
-## 项目结构
+| 命令 | 行为 |
+| --- | --- |
+| `lab init [--from-file PATH]` | 生成 `PROJECT_BRIEF.md`、`AGENTS.md`、`TASKS.md`。 |
+| `lab agents check [PATH] [--json]` | 检查规则覆盖情况，默认读取 `AGENTS.md`。 |
+| `lab skill new [--from-file PATH]` | 生成 `.agents/skills/<name>/SKILL.md`，名称转为小写短横线格式。 |
+| `lab skill review PATH [--json]` | 检查 `SKILL.md` 文件或其所在目录。 |
+| `lab log add [--from-file PATH]` | 追加运行日志；可用 `--file PATH` 指定位置。 |
+| `lab log add --dry-run` | 预览日志，不写文件。 |
 
-```text
-agent-project-lab/
-  agent_project_lab/
-    cli.py
-    models.py
-    render.py
-    commands/
-    templates/
-  examples/
-  tests/
-  AGENTS.md
-  CHANGELOG.md
-  LICENSE
-  README.md
-  README.zh-CN.md
-  pyproject.toml
+生成命令保留已有文件；需要覆盖时传入 `--force`。
+`--from-file` 读取本地 JSON，字段与交互式流程一致。
+
+## 如何理解检查结果
+
+检查基于标题、关键词和占位符规则，用来发现缺失的协作信息。
+**分数表示本工具检查清单的覆盖程度，不代表智能体表现或完整的格式合规性。**
+AGENTS.md 和 Skill 正文可以自由组织，建议的章节是本工具的约定。
+
+- 默认输出 Rich 终端报告。
+- `--json` 返回 `status`、`score`、`passed`、`checks`、`missing_items`、`suggestions`。
+- 分数至少 80 时退出码为 `0`；低于 80 或输入出错时为 `1`。
+- Skill 报告另含 `strengths`。
+
+用分数找缺口，再用真实任务检验内容是否有效。保留能改变智能体具体行动的信息，删掉重复和常识。
+参考 [Skill 编写实践](https://agentskills.io/skill-creation/best-practices)。
+
+## 示例
+
+完整 JSON 输入：
+
+- [项目初始化](examples/init_input.json)
+- [Skill 草稿](examples/skill_input.json)
+- [运行日志](examples/log_entry.json)
+
+[examples 目录](examples/) 还包含生成的 Markdown 和完整 JSON 检查报告。
+追加日志前可以先预览：
+
+```bash
+lab log add --from-file /path/to/log_entry.json --dry-run
 ```
 
-## v0.2.0 当前范围
-
-- Python CLI，基于 Typer 和 Rich。
-- 使用 Jinja2 模板生成 Markdown。
-- 使用 Pydantic 校验结构化 JSON 输入。
-- 本地生成 `PROJECT_BRIEF.md`、`AGENTS.md`、`TASKS.md`、`SKILL.md` 和 agent run logs。
-- 本地、确定性的 `AGENTS.md` / `SKILL.md` 检查。
-- checker 支持 JSON 输出。
-- pytest 测试覆盖主要 CLI 行为。
-- Ruff 用于 lint。
-- 无 Web UI、无数据库、无外部 API 调用、无隐藏网络请求、无直接产品集成。
-
-## 后续路线
-
-v0.3 可以考虑：
-
-- YAML 输入支持。
-- JSON Schema 导出。
-- 输入 schema 版本管理和迁移。
-- 更细粒度的非交互 CLI 参数。
-- 可配置模板包。
-- 更强的 Markdown 解析。
-- 项目 profile 文件。
-- SARIF 或更丰富的报告格式。
-- 对 `AGENTS.md` / `SKILL.md` 的自动修复建议。
-
-这些都属于后续增强，不是 v0.2.0 的范围。
-
-## 作品集与求职价值
-
-这个项目适合作为国内实习投递和作品集展示项目，重点不在“做了一个很大的 agent 平台”，而在于展示：
-
-- 能把 AI 协作开发流程拆成清晰、可复用的工程资产。
-- 能用 CLI 解决真实开发流程里的上下文管理问题。
-- 能用 Pydantic / pytest / Ruff 把输入校验、行为测试和质量检查做扎实。
-- 能从 v0.1 到 v0.2 逐步迭代功能，而不是一次性堆功能。
-- 能明确产品边界：local-first、不调用外部 API、不替代 AI coding agent。
-
-对 HR 来说，它展示的是完整度和表达能力；对业务面试官来说，它展示的是对开发协作流程的理解；对技术面试官来说，它展示的是 CLI 设计、结构化校验、模板渲染、测试和工程边界意识。
-
-## 开发与验证命令
+## 开发
 
 ```bash
 python -m pytest
 ruff check .
+python -m build
 ```
 
-也可以直接检查 CLI：
+实现采用 Typer CLI、Pydantic 输入校验和打包的 Jinja2 模板。
+CI 包含 Python 版本矩阵、macOS 完整演示，以及 wheel/sdist 独立安装检查。
+构建和 GitHub Release 流程见 [RELEASING.md](RELEASING.md)。
 
-```bash
-lab --help
-lab agents check AGENTS.md
-```
+v0.2.x 聚焦本地协作文件和确定性检查，无数据库、托管服务、模型调用或智能体执行。
+新增能力应先解决实际工作流问题，再考虑增加配置与依赖。
 
-## License
+## 许可证
 
-MIT. See [LICENSE](LICENSE).
+MIT，见 [LICENSE](LICENSE)。

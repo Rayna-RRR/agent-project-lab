@@ -47,142 +47,173 @@ def write_project_json(path: Path, data: Optional[dict[str, object]] = None) -> 
 def test_init_generates_project_files(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(app, ["init"], input=INIT_INPUT)
+    result = runner.invoke(app, ["init"], input=INIT_INPUT)
 
-        assert result.exit_code == 0
-        assert Path("PROJECT_BRIEF.md").exists()
-        assert Path("AGENTS.md").exists()
-        assert Path("TASKS.md").exists()
-        assert "Generated project workflow files" in result.output
-        assert "Agent Project Lab Project Brief" in Path("PROJECT_BRIEF.md").read_text(
-            encoding="utf-8"
-        )
-        agents_content = Path("AGENTS.md").read_text(encoding="utf-8")
-        assert "## Repo Layout" in agents_content
-        assert "## Setup Command" in agents_content
-        assert "## Update Rules" in agents_content
-        assert "## Task 1: Generate project brief" in Path("TASKS.md").read_text(
-            encoding="utf-8"
-        )
+    assert result.exit_code == 0
+    assert Path("PROJECT_BRIEF.md").exists()
+    assert Path("AGENTS.md").exists()
+    assert Path("TASKS.md").exists()
+    assert "Generated project workflow files" in result.output
+    assert "Agent Project Lab Project Brief" in Path("PROJECT_BRIEF.md").read_text(
+        encoding="utf-8"
+    )
+    agents_content = Path("AGENTS.md").read_text(encoding="utf-8")
+    assert "## Repo Layout" in agents_content
+    assert "## Setup Command" in agents_content
+    assert "## Update Rules" in agents_content
+    assert "## Task 1: Generate project brief" in Path("TASKS.md").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_init_does_not_overwrite_without_force(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
+    Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
 
-        result = runner.invoke(app, ["init"], input=INIT_INPUT)
+    result = runner.invoke(app, ["init"], input=INIT_INPUT)
 
-        assert result.exit_code == 1
-        assert "Refusing to overwrite" in result.output
-        assert Path("PROJECT_BRIEF.md").read_text(encoding="utf-8") == "existing brief"
-        assert not Path("AGENTS.md").exists()
-        assert not Path("TASKS.md").exists()
+    assert result.exit_code == 1
+    assert "Refusing to overwrite" in result.output
+    assert Path("PROJECT_BRIEF.md").read_text(encoding="utf-8") == "existing brief"
+    assert not Path("AGENTS.md").exists()
+    assert not Path("TASKS.md").exists()
 
 
 def test_init_refuses_existing_files_before_prompting(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
+    Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
 
-        result = runner.invoke(app, ["init"])
+    result = runner.invoke(app, ["init"])
 
-        assert result.exit_code == 1
-        assert "Refusing to overwrite" in result.output
-        assert "Project name" not in result.output
+    assert result.exit_code == 1
+    assert "Refusing to overwrite" in result.output
+    assert "Project name" not in result.output
 
 
 def test_init_force_overwrites_generated_files(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
+    Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
 
-        result = runner.invoke(app, ["init", "--force"], input=INIT_INPUT)
+    result = runner.invoke(app, ["init", "--force"], input=INIT_INPUT)
 
-        assert result.exit_code == 0
-        assert "existing brief" not in Path("PROJECT_BRIEF.md").read_text(encoding="utf-8")
-        assert Path("AGENTS.md").exists()
-        assert Path("TASKS.md").exists()
+    assert result.exit_code == 0
+    assert "existing brief" not in Path("PROJECT_BRIEF.md").read_text(encoding="utf-8")
+    assert Path("AGENTS.md").exists()
+    assert Path("TASKS.md").exists()
+
+
+def test_init_force_rejects_output_directory_before_prompting(tmp_path: Path):
+    runner = CliRunner()
+
+    Path("TASKS.md").mkdir()
+
+    result = runner.invoke(app, ["init", "--force"])
+
+    assert result.exit_code == 1
+    assert "Expected generated output paths to be files" in result.output
+    assert "TASKS.md" in result.output
+    assert "Project name" not in result.output
+    assert not Path("PROJECT_BRIEF.md").exists()
+    assert not Path("AGENTS.md").exists()
 
 
 def test_init_from_file_generates_project_files(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_project_json(Path("project.json"))
+    write_project_json(Path("project.json"))
 
-        result = runner.invoke(app, ["init", "--from-file", "project.json"])
+    result = runner.invoke(app, ["init", "--from-file", "project.json"])
 
-        assert result.exit_code == 0
-        assert Path("PROJECT_BRIEF.md").exists()
-        assert Path("AGENTS.md").exists()
-        assert Path("TASKS.md").exists()
-        assert "Generated project workflow files" in result.output
-        assert "Agent Notes Project Brief" in Path("PROJECT_BRIEF.md").read_text(
-            encoding="utf-8"
-        )
-        assert "A local tool for turning meeting notes" in Path("TASKS.md").read_text(
-            encoding="utf-8"
-        )
+    assert result.exit_code == 0
+    assert Path("PROJECT_BRIEF.md").exists()
+    assert Path("AGENTS.md").exists()
+    assert Path("TASKS.md").exists()
+    assert "Generated project workflow files" in result.output
+    assert "Agent Notes Project Brief" in Path("PROJECT_BRIEF.md").read_text(
+        encoding="utf-8"
+    )
+    assert "A local tool for turning meeting notes" in Path("PROJECT_BRIEF.md").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_init_keeps_product_context_in_brief_and_shares_task_verification(tmp_path: Path):
+    runner = CliRunner()
+
+    write_project_json(Path("project.json"))
+
+    result = runner.invoke(app, ["init", "--from-file", "project.json"])
+    brief = Path("PROJECT_BRIEF.md").read_text(encoding="utf-8")
+    agents = Path("AGENTS.md").read_text(encoding="utf-8")
+    tasks = Path("TASKS.md").read_text(encoding="utf-8")
+
+    assert result.exit_code == 0
+    assert PROJECT_JSON["target_users"] in brief
+    assert PROJECT_JSON["target_users"] not in agents
+    assert "[PROJECT_BRIEF.md](PROJECT_BRIEF.md)" in agents
+    assert "Document source" not in agents
+    assert PROJECT_JSON["project_idea"] not in tasks
+    assert tasks.count("`pytest`") == 1
+    for criterion in PROJECT_JSON["done_criteria"]:
+        assert tasks.count(criterion) == 1
+    for index, objective in enumerate(PROJECT_JSON["mvp_scope"], start=1):
+        assert f"## Task {index}: {objective}" in tasks
+    assert "task-specific check" in tasks
+    assert "verification commands with actual results" in tasks
 
 
 def test_init_from_file_does_not_overwrite_without_force(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_project_json(Path("project.json"))
-        Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
+    write_project_json(Path("project.json"))
+    Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
 
-        result = runner.invoke(app, ["init", "--from-file", "project.json"])
+    result = runner.invoke(app, ["init", "--from-file", "project.json"])
 
-        assert result.exit_code == 1
-        assert "Refusing to overwrite" in result.output
-        assert Path("PROJECT_BRIEF.md").read_text(encoding="utf-8") == "existing brief"
-        assert not Path("AGENTS.md").exists()
-        assert not Path("TASKS.md").exists()
+    assert result.exit_code == 1
+    assert "Refusing to overwrite" in result.output
+    assert Path("PROJECT_BRIEF.md").read_text(encoding="utf-8") == "existing brief"
+    assert not Path("AGENTS.md").exists()
+    assert not Path("TASKS.md").exists()
 
 
 def test_init_from_file_force_overwrites_generated_files(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        write_project_json(Path("project.json"))
-        Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
+    write_project_json(Path("project.json"))
+    Path("PROJECT_BRIEF.md").write_text("existing brief", encoding="utf-8")
 
-        result = runner.invoke(app, ["init", "--from-file", "project.json", "--force"])
+    result = runner.invoke(app, ["init", "--from-file", "project.json", "--force"])
 
-        assert result.exit_code == 0
-        assert "existing brief" not in Path("PROJECT_BRIEF.md").read_text(encoding="utf-8")
-        assert Path("AGENTS.md").exists()
-        assert Path("TASKS.md").exists()
+    assert result.exit_code == 0
+    assert "existing brief" not in Path("PROJECT_BRIEF.md").read_text(encoding="utf-8")
+    assert Path("AGENTS.md").exists()
+    assert Path("TASKS.md").exists()
 
 
 def test_init_from_file_invalid_json_errors(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        Path("project.json").write_text("{bad json", encoding="utf-8")
+    Path("project.json").write_text("{bad json", encoding="utf-8")
 
-        result = runner.invoke(app, ["init", "--from-file", "project.json"])
+    result = runner.invoke(app, ["init", "--from-file", "project.json"])
 
-        assert result.exit_code == 1
-        assert "Invalid JSON" in result.output
+    assert result.exit_code == 1
+    assert "Invalid JSON" in result.output
 
 
 def test_init_from_file_missing_required_field_errors(tmp_path: Path):
     runner = CliRunner()
 
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        data = dict(PROJECT_JSON)
-        del data["project_name"]
-        write_project_json(Path("project.json"), data)
+    data = dict(PROJECT_JSON)
+    del data["project_name"]
+    write_project_json(Path("project.json"), data)
 
-        result = runner.invoke(app, ["init", "--from-file", "project.json"])
+    result = runner.invoke(app, ["init", "--from-file", "project.json"])
 
-        assert result.exit_code == 1
-        assert "Invalid input file data" in result.output
-        assert "project_name" in result.output
+    assert result.exit_code == 1
+    assert "Invalid input file data" in result.output
+    assert "project_name" in result.output
